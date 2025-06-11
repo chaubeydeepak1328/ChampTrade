@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #000 inset !important; /* Background black */
+    -webkit-text-fill-color: white !important; /* Text white */
+    border: 1px solid #facc15 !important; /* Yellow border (Tailwind yellow-400) */
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  
+  
