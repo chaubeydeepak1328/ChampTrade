@@ -67,12 +67,7 @@ function DashboardHeader() {
               </div>
             )}
 
-            <button
-              onClick={toggleWalletConnection}
-              className="bg-golden text-dark-green px-4 py-2 rounded-lg hover:bg-golden-dark transition-colors"
-            >
-              {userAddress ? 'Disconnect Wallet' : 'Connect Wallet'}
-            </button>
+
           </div>
 
 

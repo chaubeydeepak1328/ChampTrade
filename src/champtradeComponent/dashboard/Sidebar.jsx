@@ -46,8 +46,9 @@ function Sidebar() {
       ]
     },
     {
-      title: 'Investment',
+      title: 'Portfolio',
       items: [
+        { icon: RefreshCw, label: 'Start Champ Trade', path: '/champ-trade-dashboard/StartChampTrade' },
         { icon: RefreshCw, label: 'My Champ Trade', path: '/champ-trade-dashboard/reinvestment' },
         { icon: WalletIcon, label: 'Claim', path: '/champ-trade-dashboard/withdraw' },
         { icon: Coins, label: 'Buy TCC 2.O', path: '/champ-trade-dashboard/buy-tokens' },

@@ -40,6 +40,7 @@ import { projectId, metadata, networks, wagmiAdapter } from './config';
 import './index.css';
 import ViewUser from './pages/ViewUser';
 import RegisterNewUser from './pages/RegisterNewUser';
+import StartChampTrade from './champtradeComponent/dashboard/StartChampTrade';
 
 // Setup for React Query
 const queryClient = new QueryClient();
@@ -111,6 +112,7 @@ function App() {
                 <Route path="/RegisterNewUser" element={<RegisterNewUser />} />
                 <Route path="/champ-trade-dashboard" element={<DashboardPage />}>
                   <Route index element={<DashboardOverviewPage />} />
+                  <Route path="StartChampTrade" element={<StartChampTrade />} />
                   <Route path="my-earnings" element={<MyEarningsPage />} />
                   <Route path="my-team" element={<MyTeamPage />} />
                   <Route path="my-referrals" element={<MyReferralsPage />} />

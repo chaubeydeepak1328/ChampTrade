@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { DollarSign, Users, RefreshCw, Timer } from 'lucide-react';
 
 const IncomePlan = () => {
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

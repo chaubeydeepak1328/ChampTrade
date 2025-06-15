@@ -79,10 +79,10 @@ import { LineChart, BarChart } from 'lucide-react';
 import Chart from 'chart.js/auto';
 
 const EarningsBreakdown = () => {
-  const [chartType, setChartType] = useState < 'line' | 'bar' > ('line');
-  const [timePeriod, setTimePeriod] = useState < string > ('7days');
-  const chartRef = useRef < HTMLCanvasElement > (null);
-  const chartInstance = useRef < Chart | null > (null);
+  const [chartType, setChartType] = useState('line');
+  const [timePeriod, setTimePeriod] = useState('7days');
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
 
   // Sample data based on time period
   const getChartData = () => {
