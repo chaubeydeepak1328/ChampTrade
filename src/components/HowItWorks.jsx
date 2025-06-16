@@ -37,7 +37,7 @@ const steps = [
 ];
 
 const StepCard = ({ icon, action, outcome, delay, index }) => {
-  const cardRef = useRef < HTMLDivElement > (null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -93,7 +93,7 @@ const StepCard = ({ icon, action, outcome, delay, index }) => {
 };
 
 const HowItWorks = () => {
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

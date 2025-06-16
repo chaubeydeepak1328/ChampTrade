@@ -22,7 +22,7 @@ const UtilityCard = ({ icon, title, description }) => (
 
 const RealWorldUtility = () => {
   const sliderRef = useRef < HTMLDivElement | null > (null);
-  const [sliderInstanceRef] = useKeenSlider < HTMLDivElement > ({
+  const [sliderInstanceRef] = useKeenSlider({
     loop: true,
     mode: 'free-snap',
     slides: {

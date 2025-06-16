@@ -191,7 +191,7 @@ const UserTypeCard = ({
   delay,
   className = '',
 }) => {
-  const cardRef = useRef < HTMLDivElement > (null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -245,7 +245,7 @@ const UserTypeCard = ({
 };
 
 const WhoCanJoin = () => {
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
   const navigate = useNavigate(); // Added the useNavigate hook
 
   useEffect(() => {

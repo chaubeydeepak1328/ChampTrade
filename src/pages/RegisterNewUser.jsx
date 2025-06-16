@@ -1,25 +1,129 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTransaction } from '../config/register';
+import { useStore } from '../Store/UserStore';
+import { useAppKit, useAppKitAccount } from '@reown/appkit/react';
+import Swal from 'sweetalert2';
 
 const RegisterNewUser = () => {
     const [sponsorAddress, setSponsorAddress] = useState('');
     const navigate = useNavigate();
 
-    const handleRegister = () => {
-        if (sponsorAddress.trim() === '') {
-            alert('Please enter sponsor wallet address');
+    const { open } = useAppKit();
+    const { address, isConnected } = useAppKitAccount();
+    const { handleSendTx, hash } = useTransaction();
+
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [currentAction, setCurrentAction] = useState();
+
+    const RegisterUser = useStore((state) => state.RegisterUser);
+    const approveStakeAmount = useStore((state) => state.approveStakeAmount)
+
+
+    // Handle form submission
+    const handleRegister = async () => {
+        if (!sponsorAddress.trim()) {
+            Swal.fire("Error", "Please enter sponsor wallet address", "error");
             return;
         }
-        // You can navigate or handle registration logic here
-        console.log('Registering with sponsor:', sponsorAddress);
-        navigate(`/register/${sponsorAddress}`);
-    };
 
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleRegister();
+        try {
+            if (!isConnected) {
+                await open();  // Connect wallet
+            }
+
+            setIsRegistering(true);  // Start registration after wallet connected
+        } catch (error) {
+            console.error(error);
+            Swal.fire("Error", "Failed to connect wallet", "error");
         }
     };
+
+    useEffect(() => {
+        const registerUserToContract = async () => {
+            try {
+                if (!address || !isConnected || !isRegistering) return;
+
+                const response = await approveStakeAmount(address);
+                console.log(response)
+
+                if (response?.status) {
+                    try {
+                        const res = await RegisterUser(address, sponsorAddress);
+                        console.log(currentAction, res)
+                        setCurrentAction("registration");
+                        await handleSendTx(res);
+                    } catch (error) {
+                        Swal.fire("Error", "Something went wrong during transaction", "error");
+                    }
+                } else {
+                    // For approval, wait for user confirmation
+                    try {
+                        console.log(currentAction, response?.trxData)
+                        setCurrentAction("approve");
+                        await handleSendTx(response?.trxData);
+                    } catch (error) {
+                        Swal.fire("Error", "Something went wrong during transaction", "error");
+                    }
+
+                }
+            } catch (error) {
+                console.error("Register error", error);
+                Swal.fire("Error", "Registration failed", "error");
+            } finally {
+                setIsRegistering(false);
+            }
+        };
+
+        registerUserToContract();
+    }, [isRegistering, address, isConnected]);
+
+    useEffect(() => {
+        if (hash) {
+            localStorage.setItem("userData", JSON.stringify({ userAddress: address, data: {} }));
+            const title = currentAction === "approve" ? "Approval Successful!" : "Registration Successful!";
+
+            if (currentAction === "approve") {
+                Swal.fire({
+                    title: title,
+                    html: `<a href="https://testnet.bscscan.com/tx/${hash}" target="_blank" style="color:#3085d6;">View on BscScan</a>`,
+                    icon: 'success',
+                    timer: 5000,  // ✅ 5 seconds countdown
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: title,
+                    html: `<a href="https://testnet.bscscan.com/tx/${hash}" target="_blank" style="color:#3085d6;">View on BscScan</a>`,
+                    icon: 'success',
+                    confirmButtonText: 'Close'
+                }).then(() => {
+                    navigate("/champ-trade-dashboard");
+                });
+            }
+        }
+    }, [hash, address, navigate, currentAction]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center px-4">
@@ -33,7 +137,6 @@ const RegisterNewUser = () => {
                         type="text"
                         value={sponsorAddress}
                         onChange={(e) => setSponsorAddress(e.target.value)}
-                        onKeyPress={handleKeyPress}
                         placeholder="Enter sponsor wallet address"
                         className="w-full p-3 rounded-lg text-black outline-none focus:ring-2 focus:ring-yellow-400"
                     />

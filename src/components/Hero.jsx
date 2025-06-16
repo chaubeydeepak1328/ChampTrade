@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 const Hero = () => {
-  const heroRef = useRef < HTMLDivElement > (null);
+  const heroRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {

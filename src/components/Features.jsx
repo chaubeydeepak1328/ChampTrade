@@ -4,7 +4,7 @@ import { ShieldCheck, Zap, Globe, BarChart } from 'lucide-react';
 
 
 const FeatureCard = ({ icon, title, description, delay }) => {
-  const cardRef = useRef < HTMLDivElement > (null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -47,7 +47,7 @@ const FeatureCard = ({ icon, title, description, delay }) => {
 };
 
 const Features = () => {
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

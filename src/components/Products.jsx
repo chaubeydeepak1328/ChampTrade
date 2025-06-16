@@ -47,7 +47,7 @@ const ProductCard = ({
   isActive,
   onClick
 }) => {
-  const cardRef = useRef < HTMLDivElement > (null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -106,8 +106,8 @@ const ProductCard = ({
   );
 };
 
-const ProductDetail= ({ product }) => {
-  const detailRef = useRef < HTMLDivElement > (null);
+const ProductDetail = ({ product }) => {
+  const detailRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -167,7 +167,7 @@ const ProductDetail= ({ product }) => {
 
 const Products = () => {
   const [activeProduct, setActiveProduct] = useState < Product > (products[0]);
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

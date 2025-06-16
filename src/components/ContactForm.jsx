@@ -5,11 +5,11 @@ import success from '../images/success.png'
 
 
 const ContactForm = () => {
-  const [formState, setFormState] = useState < FormState > (initialState);
-  const [errors, setErrors] = useState < Partial < FormState >> ({});
+  const [formState, setFormState] = useState(initialState);
+  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
 
   const handleChange = (
     e

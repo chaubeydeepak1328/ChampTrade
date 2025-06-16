@@ -32,7 +32,7 @@ const testimonials = [
 const Testimonials = () => {
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const sectionRef = useRef < HTMLDivElement > (null);
+  const sectionRef = useRef(null);
 
   const next = () => {
     if (isAnimating) return;
