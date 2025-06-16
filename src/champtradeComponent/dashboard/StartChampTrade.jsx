@@ -1,30 +1,126 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Clock, RefreshCw, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react';
 import { Coins, TrendingUp } from 'lucide-react';
+import { useAppKitAccount } from '@reown/appkit/react';
+import { useTransaction } from '../../config/register';
+import { useStore } from '../../Store/UserStore';
+import Swal from 'sweetalert2';
 
 const StartChampTrade = () => {
-  const [showDropdown, setShowDropdown] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const progress = 66.66;
-  const daysRemaining = 163;
-  const transactionHistory = [
-    { id: 1, type: 'Deposit', amount: '100 TCC', date: '2023-05-15', status: 'Completed' },
-    { id: 2, type: 'Withdrawal', amount: '50 TCC', date: '2023-05-10', status: 'Completed' },
-    { id: 3, type: 'Reinvestment', amount: '33.33 TCC', date: '2023-05-01', status: 'Pending' },
-    { id: 4, type: 'Bonus', amount: '10 TCC', date: '2023-04-28', status: 'Completed' },
-  ];
 
-  const handleStartTrade = () => {
-    setShowSuccessMessage(true);
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 5000);
+
+  const localData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = localData?.userAddress || null;
+
+  const amount = 10000;
+
+
+  const [trxData, setTrxData] = useState();
+  const [loading, setLoading] = useState(false);
+  const [currentAction, setCurrentAction] = useState("");
+  const { address, isConnected } = useAppKitAccount();
+
+
+  const getUserAllowance = useStore((state) => state.getUserAllowance);
+
+  const [userData, setUserData] = useState();
+
+
+
+  useEffect(() => {
+    const fetchUserAllowance = async () => {
+      const res = await getUserAllowance(userAddress)
+      setUserData(res)
+
+    }
+    if (userAddress)
+      fetchUserAllowance()
+  }, [])
+
+
+  const { handleSendTx, hash } = useTransaction()
+
+  // =====================================================================
+  // for Invest the stake
+  // =====================================================================
+
+
+  const stackAmount = useStore((state) => state.stackAmount);
+
+
+  useEffect(() => {
+    if (hash) {
+      const title = currentAction === "approve" ? "Approval Successful!" : "Staking Successful!";
+      Swal.fire({
+        title: title,
+        html: `<a href="https://testnet.bscscan.com/tx/${hash}" target="_blank" style="color:#3085d6;">View on BscScan</a>`,
+        icon: 'success',
+        confirmButtonText: 'Close'
+      });
+
+      setLoading(false)
+    }
+  }, [hash, currentAction]);
+
+
+
+  // =====================================================================
+  // for approve the Amount
+  // =====================================================================
+
+  const approveStakeAmount = useStore((state) => state.approveStakeAmount);
+
+  const handleStake = async () => {
+    if (address && isConnected) {
+      try {
+        setLoading(true);
+        const response = await approveStakeAmount(address, amount);
+
+        if (response?.status) {
+          // If already approved, proceed to stake
+          const stakeResponse = await stackAmount(address, amount);
+          setCurrentAction("stake");
+          try {
+            console.log(currentAction, stakeResponse)
+            await handleSendTx(stakeResponse);
+          } catch (error) {
+            Swal.fire("Error", "Something went wrong during transaction", "error");
+          }
+        } else {
+          // For approval, wait for user confirmation
+          setCurrentAction("approve");
+          try {
+            console.log(currentAction, trxData)
+            await handleSendTx(response?.trxData);
+          } catch (error) {
+            Swal.fire("Error", "Something went wrong during transaction", "error");
+          }
+          // Show modal or confirmation dialog here
+        }
+      } catch (error) {
+        Swal.fire("Error", "Something went wrong during approve", "error");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      Swal.fire("Warning", "Connect your wallet first", "warning");
+    }
   };
+
+  //  
+
+  const requiredTcc = parseFloat(userData?.requiredTcc);
+  const tccPriceUsd = parseFloat(userData?.TccPriceUsd);
+
+  const required = parseFloat(requiredTcc / tccPriceUsd).toFixed(4);
+
+
 
   return (
     <>
       {/* Stylish Centered Flash Message */}
-      {showSuccessMessage && (
+      {/* {showSuccessMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full px-4 flex items-center justify-center pointer-events-none">
           <div className="animate-fade-in-up bg-gradient-to-br from-yellow-800 to-yellow-700 text-white px-4 py-4 sm:px-8 sm:py-6 rounded-xl shadow-2xl border-2 border-yellow-500/20 transform transition-all duration-300 flex items-center gap-3 sm:gap-4 w-full max-w-md mx-auto">
             <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-200 flex-shrink-0" />
@@ -40,23 +136,8 @@ const StartChampTrade = () => {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
-      {/* <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-up {
-          animation: fadeInUp 0.5s ease-out forwards;
-        }
-      `}</style> */}
       <style>{`
   @keyframes fadeInUp {
     from {
@@ -83,10 +164,10 @@ const StartChampTrade = () => {
               <Coins className="h-6 w-6 text-yellow-500" />
               <h3 className="text-lg font-semibold text-white">Current Price (TCC)</h3>
             </div>
-            <div className="text-3xl font-bold text-yellow-500 mb-2">$0.01</div>
+            <div className="text-3xl font-bold text-yellow-500 mb-2">${userData?.TccPriceUsd}</div>
             <div className="flex items-center gap-2 text-green-400">
-              <TrendingUp className="h-4 w-4" />
-              <span>+5.2% (24h)</span>
+              {/* <TrendingUp className="h-4 w-4" /> */}
+              {/* <span>+5.2% (24h)</span> */}
             </div>
           </div>
 
@@ -96,10 +177,10 @@ const StartChampTrade = () => {
               <Coins className="h-6 w-6 text-yellow-500" />
               <h3 className="text-lg font-semibold text-white">Available TCC</h3>
             </div>
-            <div className="text-3xl font-bold text-yellow-500 mb-2">1,250.50</div>
+            <div className="text-3xl font-bold text-yellow-500 mb-2">{userData?.userBalance}</div>
             <div className="flex items-center gap-2 text-green-400">
-              <TrendingUp className="h-4 w-4" />
-              <span>+3.8% (24h)</span>
+              {/* <TrendingUp className="h-4 w-4" />
+              <span>+3.8% (24h)</span> */}
             </div>
           </div>
         </div>
@@ -114,7 +195,7 @@ const StartChampTrade = () => {
                   <input
                     type="number"
                     className="text-lg font-bold w-20 focus:outline-none bg-transparent text-white"
-                    placeholder="$110" disabled
+                    placeholder={`$ ${userData?.requiredTcc}`} disabled
                   />
                   <span className="text-gray-400">TCC</span>
                 </div>
@@ -125,7 +206,7 @@ const StartChampTrade = () => {
                   <input
                     type="number"
                     className="text-lg font-bold w-20 focus:outline-none bg-transparent text-white"
-                    placeholder="0.00 " disabled
+                    placeholder={required} disabled
                   />
                   <span className="text-gray-400">TCC</span>
                 </div>
@@ -134,10 +215,10 @@ const StartChampTrade = () => {
             <div className="flex justify-center">
               <div className="flex justify-center items-center min-h-[100px]">
                 <button
-                  onClick={handleStartTrade}
-                  className="font-medium p-4 hover:text-yellow-500 transition-colors bg-yellow-800 text-white rounded-lg hover:bg-yellow-700 transform hover:scale-105 transition-transform duration-200"
+                  onClick={() => handleStake()}
+                  className={`font-medium p-4 hover:text-yellow-500 transition-colors   ${parseFloat(amount) <= parseFloat(userData?.approvedAmt) ? "bg-green-800" : "bg-yellow-800"} text-white rounded-lg hover:bg-yellow-700 transform hover:scale-105 transition-transform duration-200`}
                 >
-                  Start Champ trade
+                  {parseFloat(amount) <= parseFloat(userData?.approvedAmt) ? "Start Champ trade" : "Approve Amount"}
                 </button>
               </div>
             </div>
