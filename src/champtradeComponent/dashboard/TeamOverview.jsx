@@ -1,12 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
+import { useStore } from '../../Store/UserStore';
 
 const TeamOverview = () => {
+
+
+  const [TeamData, setTeamData] = useState();
+
+
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
+
+  const getTeamDashboardData = useStore((state) => state.getTeamDashboardData);
+
+  useEffect(() => {
+    const fetchTeamData = async () => {
+      const res = await getTeamDashboardData(userAddress)
+      setTeamData(res);
+    }
+
+    if (userAddress) fetchTeamData()
+  }, [])
+
+
+
   const teamStats = {
-    totalMembers: 155,
-    activeMembers: 142,
-    inactiveMembers: 13,
-    dailyEarnings: 6.20,
+    totalMembers: TeamData?.totalMembers,
+    activeMembers: TeamData?.activeMembers,
+    inactiveMembers: TeamData?.inactiveMembers,
+    dailyEarnings: TeamData?.dailyTeamEarnings,
     weeklyGrowth: '+12%',
     monthlyGrowth: '+45%'
   };

@@ -16,7 +16,7 @@ const web3 = new Web3(INFURA_URL);
 
 
 const Contract = {
-    "TCC_STAKING": "0xc9c8cce0e1c080834bd0d9af5ccce1204059365c",
+    "TCC_STAKING": "0x342e8CAcdaC1d4fC6b8d646aF0D23fAc4F16a69c",
     "TCC_TEST": "0xb1480314d22d172E1f77a73fE3a14F307CD088c6",
 }
 
@@ -74,35 +74,99 @@ export const useStore = create((set, get) => ({
         }
     },
 
-    dashboardInfo: async (userAddress) => {
-
-        const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
-        const userInvestment = contract.methods.getUserInvestmentStats(userAddress).call();
-        const getUserRoi = contract.methods.getUserInvestmentStats(userAddress).call();
 
 
+    dashboardCardInfo: async (userAddress) => {
+
+        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+        console.log("==================> TCC_STAKING", TCC_STAKING)
+
+        const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+        // ✅ Await all calls properly
+        const userInvestments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+        const directReferral = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
+        const userCompStats = await contract.methods.getUserComprehensiveStats(userAddress).call();
+
+        // ✅ Since userInvestments is an array, you need to sum investedAmountInTCC
+        let totalInvestedTCC = 0;
+        let totalEarningsTCC = 0;
+        let dailyIncomeUSD = 0;
+        let teamIncomeUsd = 0;
+
+        for (let i = 0; i < userInvestments.length; i++) {
+            totalInvestedTCC += parseInt(userInvestments[i].investedAmountInTCC);
+            totalEarningsTCC += parseInt(userInvestments[i].totalROIReceived);
+            dailyIncomeUSD += parseInt(userInvestments[i].dailyROIUsd);
+        }
+
+        // const currentDay = Math.floor(Date.now() / 1000 / 60);  // Since contract uses SECONDS_IN_DAY = 60
+        // const dayOfWeek = currentDay % 7;
+
+        // if (dayOfWeek !== 3) { // 3 is Sunday index
+        //     for (let i = 0; i < levelROIRecords.length; i++) {
+        //         const record = levelROIRecords[i];
+        //         if (!record.isCompleted) {
+        //             teamIncomeUsd += parseInt(record.roiAmount);
+        //         }
+        //     }
+        // }
+
+        // ✅ Finally create CardInfo correctly
         const CardInfo = {
-            My_PortFolio: userInvestment.toString(),
-            Total_Earnings: userInvestment.toString(),
-            Reinvest_Reserve: "",
-            Daily_Income: userInvestment.toString(),
-            Active_Referrals: "",
-            Team_Income_Today: "",
-        }
+            My_PortFolio: (parseFloat(totalInvestedTCC) / 1e8).toFixed(2),
+            Total_Earnings: (parseFloat(totalEarningsTCC) / 1e18).toFixed(2),
+            Reinvest_Reserve: (parseFloat(userCompStats.totalReinvestmentReserve) / 1e8).toFixed(2),
+            Daily_Income: (parseFloat(dailyIncomeUSD) / 1e8).toFixed(2),
+            Active_Referrals: directReferral.totalReferrals.toString(),
+            Team_Income_Today: (teamIncomeUsd / 1e8).toFixed(2) // if you're not calculating team income yet
+        };
 
-        const transaction = {
-            ITEM: "",
-            Amount: "",
-            Wallet: "",
-            Status: "",
-            Time: "",
-            type: "",
-        }
-
-        return { CardInfo, transaction }
-
-
+        return CardInfo;
     },
+
+
+    getMyEarningsData: async (userAddress) => {
+
+        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+        const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+        // 1️⃣ Get user investments
+        const userInvestments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+
+        let totalDirectEarningUsd = 0;
+
+        for (let i = 0; i < userInvestments.length; i++) {
+            const roiReceived = parseInt(userInvestments[i].totalROIReceived);
+            totalDirectEarningUsd += roiReceived;
+        }
+
+        // Convert from 1e8 to normal USD
+        totalDirectEarningUsd = totalDirectEarningUsd / 1e8;
+
+        // 2️⃣ Get referral earnings
+        // const levelROIRecords = await contract.methods.levelROIReceived(userAddress).call();
+
+        let totalReferralEarningUsd = 0;
+
+        // for (let i = 0; i < levelROIRecords.length; i++) {
+        //     const record = levelROIRecords[i];
+        //     const totalUsdReceived = parseInt(record.totalReceivedAmountInUSD);
+        //     totalReferralEarningUsd += totalUsdReceived;
+        // }
+
+        // totalReferralEarningUsd = totalReferralEarningUsd / 1e8;
+
+        // 3️⃣ Return properly formatted object
+        const earningsData = {
+            directIncome: parseFloat(totalDirectEarningUsd / 1e10).toFixed(5),
+            referralIncome: totalReferralEarningUsd.toFixed(2),
+        }
+
+        return earningsData;
+    },
+
+
 
 
 
@@ -448,6 +512,178 @@ export const useStore = create((set, get) => ({
             directSponsor
         }
 
+    },
+
+
+    getTeamDashboardData: async (userAddress) => {
+
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            // Get all referrals
+            const { referrals, totalReferrals } = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
+
+            let activeMembers = 0;
+
+            for (let i = 0; i < referrals.length; i++) {
+                const isActive = await contract.methods.isUserRegistered(referrals[i].addr).call();
+                if (isActive) {
+                    activeMembers++;
+                }
+            }
+
+            const inactiveMembers = Number(totalReferrals) - Number(activeMembers);
+
+            // Calculate today's team earning
+            let teamEarningTodayUsd = 0;
+
+            // const levelROIRecords = await contract.methods.getLevelROIReceivedSummary(userAddress).call();  // ← Note: you need to add this function as discussed earlier
+
+            // Get today's date (in your contract's SECONDS_IN_DAY scale)
+            // const currentDay = Math.floor(Date.now() / 1000 / 60);  // Because your contract: SECONDS_IN_DAY = 60
+            // const dayOfWeek = currentDay % 7;
+
+            // if (dayOfWeek !== 3) { // not Sunday
+            //     for (let i = 0; i < levelROIRecords.length; i++) {
+            //         const record = levelROIRecords[i];
+            //         if (!record.isCompleted) {
+            //             teamEarningTodayUsd += parseInt(record.roiAmount);
+            //         }
+            //     }
+            // }
+
+            const teamDashboard = {
+                totalMembers: Number(totalReferrals),
+                activeMembers: Number(activeMembers),
+                inactiveMembers: Number(inactiveMembers),
+                dailyTeamEarnings: (teamEarningTodayUsd / 1e8).toFixed(2),
+            };
+
+            console.log(teamDashboard)
+
+            return teamDashboard;
+        } catch (error) {
+            console.log(error)
+        }
+    },
+
+
+    getWihDrawDetails: async (userAddress) => {
+        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+        console.log("==================> TCC_STAKING", TCC_STAKING)
+
+        // console.log(Contract["TCC_TEST"], TCC_TEST_ABI)
+        const contract = new web3.eth.Contract(TCC_TEST_ABI, Contract["TCC_TEST"]);
+        const contract1 = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+        // Approved amount come in wei
+        const userBalance = await contract.methods.balanceOf(userAddress).call();
+        const TccPriceUsd = await contract1.methods.getTccPriceInUsd().call();
+
+
+        const data = {
+            userBalance: parseInt(web3.utils.fromWei(userBalance, "ether")).toString(),
+            TccPriceUsd: parseFloat(BigInt(TccPriceUsd) / BigInt(1000000)),
+
+
+
+        };
+
+        console.log(data)
+
+        return data
+    },
+
+    getUserIndWdrDetails: async (userAddress) => {
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            console.log("==================> TCC_STAKING", TCC_STAKING)
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // come in Array format
+            const investmentId = await contract.methods.getUserInvestmentIDs(userAddress).call();
+
+            const invetmentData = [];
+
+            for (let i = 0; i < investmentId.length; i++) {
+
+                const response = await contract.methods.getNextClaimInfo(userAddress, investmentId[i]).call();
+                invetmentData.push({
+                    nextClaimTimestamp: response.nextClaimTimestamp,
+                    secondsUntilClaim: response.secondsUntilClaim,
+                    timeUntilClaim: response.timeUntilClaim,
+                    currentDay: response.currentDay,
+                    currentDayOfWeek: response.currentDayOfWeek.toString(),
+                    canClaimNow: response.canClaimNow,
+                    daysClaimed: response.daysClaimed,
+                    daysRemainingInCycle: response.daysRemainingInCycle,
+                    investmentId: investmentId[i],
+                })
+
+            }
+
+            console.log(invetmentData)
+
+            return invetmentData
+
+        } catch (error) {
+            console.log(response)
+        }
+    },
+
+
+    claimRoiIndividual: async (userAddress, investmentId) => {
+        try {
+
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            console.log(investmentId)
+
+            // Prepare transaction data
+            const trxData = await contract.methods.claimRoi(investmentId).encodeABI();
+
+            // Get current gas price
+            const gasPrice = await web3.eth.getGasPrice();
+
+            let gasLimit;
+            try {
+                gasLimit = await web3.eth.estimateGas({
+                    from: userAddress,
+                    to: Contract["TCC_STAKING"],
+                    data: trxData,
+                    value: 0  // no native coin transfer for staking ERC20
+                });
+            } catch (error) {
+                console.error("❌ Gas estimation failed:", error);
+                alert("Gas estimation failed. Please check contract and inputs.");
+                return;
+            }
+
+            // Calculate gas cost (optional for logging only)
+            const gasCost = web3.utils.fromWei((BigInt(gasLimit) * BigInt(gasPrice)).toString(), "ether");
+            console.log("Estimated Gas Cost in ETH:", gasCost);
+
+            // Prepare final transaction object
+            const tx = {
+                from: userAddress,
+                to: Contract["TCC_STAKING"],
+                data: trxData,
+                gas: gasLimit,
+                gasPrice: gasPrice,
+            };
+
+            console.log("✅ stackAmount transaction prepared", tx);
+
+            return tx;
+
+        } catch (error) {
+            console.log(error)
+        }
     }
+
+
 
 }));

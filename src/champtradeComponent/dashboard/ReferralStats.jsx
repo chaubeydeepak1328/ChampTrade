@@ -63,10 +63,8 @@ const ReferralStats = () => {
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                <div>
-                  <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Wallet</p>
-                  <p className="text-white font-medium text-xs sm:text-sm truncate">{level.walletAddress}</p>
-                </div>
+
+
                 <div>
                   <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Status</p>
                   <p className={`font-medium text-xs sm:text-sm ${level.isActive ? "text-green-400" : "text-red-400"}`}>

@@ -111,6 +111,8 @@ function App() {
                 <Route path="/view-user" element={<ViewUser />} />
                 <Route path="/RegisterNewUser" element={<RegisterNewUser />} />
                 <Route path="/champ-trade-dashboard" element={<DashboardPage />}>
+
+                
                   <Route index element={<DashboardOverviewPage />} />
                   <Route path="StartChampTrade" element={<StartChampTrade />} />
                   <Route path="my-earnings" element={<MyEarningsPage />} />

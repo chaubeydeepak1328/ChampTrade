@@ -5,10 +5,9 @@ import { useAppKitAccount } from '@reown/appkit/react';
 import { useTransaction } from '../../config/register';
 import { useStore } from '../../Store/UserStore';
 import Swal from 'sweetalert2';
+import { Spinner } from '../../utils/helpingAnimation'
 
 const StartChampTrade = () => {
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-
 
   const localData = JSON.parse(localStorage.getItem("userData") || "null");
   const userAddress = localData?.userAddress || null;
@@ -218,7 +217,7 @@ const StartChampTrade = () => {
                   onClick={() => handleStake()}
                   className={`font-medium p-4 hover:text-yellow-500 transition-colors   ${parseFloat(amount) <= parseFloat(userData?.approvedAmt) ? "bg-green-800" : "bg-yellow-800"} text-white rounded-lg hover:bg-yellow-700 transform hover:scale-105 transition-transform duration-200`}
                 >
-                  {parseFloat(amount) <= parseFloat(userData?.approvedAmt) ? "Start Champ trade" : "Approve Amount"}
+                  {loading ? <Spinner /> : parseFloat(amount) <= parseFloat(userData?.approvedAmt) ? "Start Champ trade" : "Approve Amount"}
                 </button>
               </div>
             </div>

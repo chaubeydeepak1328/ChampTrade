@@ -1,48 +1,91 @@
 import { DollarSign, Calendar, Users, RefreshCw, TrendingUp } from 'lucide-react';
+import { useStore } from '../../Store/UserStore';
+import { useEffect, useState } from 'react';
 
 function MyOverviewWidgets() {
+
+  // Retrieve user address from local storage
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
+
+  const dashboardCardInfo = useStore((state) => state.dashboardCardInfo);
+
+  const [cardInfo, setCardInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCardInfo = async () => {
+      try {
+        const response = await dashboardCardInfo(userAddress);
+        setCardInfo(response);
+      } catch (err) {
+        console.error("Failed to fetch dashboard info", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    if (userAddress) {
+      fetchCardInfo();
+    }
+  }, [userAddress, dashboardCardInfo]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40 text-yellow-500">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!cardInfo) {
+    return (
+      <div className="flex justify-center items-center h-40 text-red-500">
+        Failed to load data
+      </div>
+    );
+  }
+
   const metrics = [
     {
       icon: Calendar,
       label: 'My PortFolio',
-      value: '163',
+      value: cardInfo?.My_PortFolio ?? 0,
       subtext: 'Number of Investment (Sum)'
     },
     {
       icon: Calendar,
       label: 'Total Earnings',
-      value: '$123.17',
+      value: (cardInfo?.Total_Earnings ?? 0),
       subtext: 'lifetime'
     },
     {
       icon: RefreshCw,
       label: 'Reinvest Reserve',
-      value: '$66.66',
+      value: '$' + (cardInfo?.Reinvest_Reserve ?? 0),
       subtext: 'of $100'
     },
     {
       icon: DollarSign,
       label: 'Daily Income',
-      value: '$0.50',
+      value: '$' + (cardInfo?.Daily_Income ?? 0),
       subtext: 'per day'
     },
-
     {
       icon: Users,
       label: 'Active Referrals',
-      value: '96',
+      value: cardInfo?.Active_Referrals ?? 0,
       subtext: 'total (L1-L6)'
     },
     {
       icon: TrendingUp,
       label: 'Team Income Today',
-      value: '$1,250',
+      value: '$' + (cardInfo?.Team_Income_Today ?? 0),
       subtext: 'of $1,800 cap'
     }
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6  sm:px-0">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 sm:px-0">
       {metrics.map(({ icon: Icon, label, value, subtext }) => (
         <div
           key={label}

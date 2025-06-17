@@ -1,72 +1,8 @@
-// import React from 'react';
-// import { Clock, RefreshCw } from 'lucide-react';
-
-// const PlanProgress = () => {
-//   const progress = 66.66; // Example progress value
-//   const daysRemaining = 163;
-
-//   return (
-//     <div className="bg-[rgb(20,20,20)]  rounded-xl p-4 sm:p-6 shadow-lg border border-yellow-500/20 mx-2 sm:mx-0">
-//     <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center gap-2">
-//       <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />
-//       Plan & Reinvestment Progress
-//     </h3>
-
-//     <div className="space-y-4 sm:space-y-6">
-//       {/* Progress Bar */}
-//       <div>
-//         <div className="flex justify-between text-xs sm:text-sm text-gray-400 mb-1 sm:mb-2">
-//           <span>Progress to Reinvestment</span>
-//           <span>${progress.toFixed(2)} / $100.00</span>
-//         </div>
-//         <div className="h-3 sm:h-4 bg-[rgb(20,20,20)] border border-yellow-500 rounded-full overflow-hidden">
-//           <div 
-//             className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400"
-//             style={{ width: `${progress}%` }}
-//           />
-//         </div>
-//       </div>
-
-//       {/* Time Remaining */}
-//       <div className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-300">
-//         <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
-//         <span>{daysRemaining} days remaining in current cycle</span>
-//       </div>
-
-//       {/* Milestones - Stack on mobile */}
-//       <div className="space-y-2 sm:space-y-3">
-//         <h4 className="text-white font-semibold text-sm sm:text-base">Reinvestment Milestones</h4>
-//         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-//           <div className="text-center p-2 bg-[rgb(20,20,20)] border border-yellow-500  rounded-lg">
-//             <div className="text-yellow-500 font-bold text-sm sm:text-base">Year 1</div>
-//             <div className="text-xs sm:text-sm text-gray-400">$33.33</div>
-//           </div>
-//           <div className="text-center p-2 bg-[rgb(20,20,20)] border border-yellow-500  rounded-lg">
-//             <div className="text-yellow-500 font-bold text-sm sm:text-base">Year 2</div>
-//             <div className="text-xs sm:text-sm text-gray-400">$66.66</div>
-//           </div>
-//           <div className="text-center p-2 bg-[rgb(20,20,20)]  border border-yellow-500 rounded-lg">
-//             <div className="text-yellow-500 font-bold text-sm sm:text-base">Year 3</div>
-//             <div className="text-xs sm:text-sm text-gray-400">$100.00</div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Auto-Reinvestment Note */}
-//       <div className="text-xs sm:text-sm text-gray-400 bg-[rgb(20,20,20)]  border border-yellow-500 p-3 sm:p-4 rounded-lg">
-//         <p>Your plan will automatically reinvest when you reach $100 in reserve.</p>
-//       </div>
-//     </div>
-//   </div>
-//   );
-// };
-
-// export default PlanProgress;
-
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Clock, RefreshCw, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react';
-import { Coins, TrendingUp } from 'lucide-react';
+import { useStore } from '../../Store/UserStore';
+import Swal from 'sweetalert2';
+import { useTransaction } from '../../config/register';
 
 const PlanProgress = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -80,12 +16,92 @@ const PlanProgress = () => {
     { id: 4, type: 'Bonus', amount: '10 TCC', date: '2023-04-28', status: 'Completed' },
   ];
 
-  const handleStartTrade = () => {
-    setShowSuccessMessage(true);
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 5000);
-  };
+
+
+  // ================================================================
+  // Individual Earning 
+  // ================================================================
+
+  const [selectedInvestmentId, setSelectedInvestmentId] = useState('');
+  const [investments, setInvestments] = useState([]);
+
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
+
+  const getUserIndWdrDetails = useStore((state) => state.getUserIndWdrDetails);
+
+  useEffect(() => {
+    const fetchInvestments = async () => {
+      if (!userAddress) return;
+      const res = await getUserIndWdrDetails(userAddress);
+
+      // Normalize data properly
+      const normalized = res.map(item => ({
+        investmentId: Number(item.investmentId),
+        canClaimNow: item.canClaimNow,
+        daysClaimed: Number(item.daysClaimed),
+        daysRemainingInCycle: Number(item.daysRemainingInCycle),
+        timeUntilClaim: item.timeUntilClaim,
+        currentDayOfWeek: item.currentDayOfWeek
+      }));
+
+      setInvestments(normalized);
+
+      if (normalized.length > 0) {
+        setSelectedInvestmentId(normalized[0].investmentId);
+      }
+    };
+
+    if (userAddress) fetchInvestments();
+
+  }, [userAddress]);
+
+  const selectedInvestment = investments.find(inv => inv.investmentId === selectedInvestmentId);
+
+  function calculateRemainingDays(currentDayOfWeek) {
+    return (7 - parseInt(currentDayOfWeek)) % 7;
+  }
+
+
+  // ================================================================
+  // Claim Earning ROI
+  // ================================================================
+
+  function calculateRemainingDays(currentDayOfWeek) {
+    return (7 - currentDayOfWeek) % 7;
+  }
+
+  const { handleSendTx, hash } = useTransaction()
+
+  useEffect(() => {
+    if (hash) {
+      Swal.fire({
+        title: "Transaction Success Full ",
+        html: `<a href="https://testnet.bscscan.com/tx/${hash}" target="_blank" style="color:#3085d6;">View on BscScan</a>`,
+        icon: 'success',
+        confirmButtonText: 'Close'
+      });
+
+    }
+  }, [hash]);
+
+  const claimRoiIndividual = useStore((state) => state.claimRoiIndividual);
+
+
+  const handleClaim = async () => {
+    try {
+      const response = await claimRoiIndividual(userAddress, selectedInvestmentId)
+
+      if (response) {
+        await handleSendTx(response);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+
 
   return (
     <>
@@ -108,21 +124,7 @@ const PlanProgress = () => {
         </div>
       )}
 
-      {/* <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in-up {
-          animation: fadeInUp 0.5s ease-out forwards;
-        }
-      `}</style> */}
+
       <style>{`
   @keyframes fadeInUp {
     from {
@@ -163,21 +165,25 @@ const PlanProgress = () => {
               )}
             </button>
 
-            {showDropdown && (
-              <div className="absolute right-0 mt-1 sm:mt-2 w-40 sm:w-48 bg-[rgb(30,30,30)] rounded-lg shadow-lg border border-yellow-500/20 z-10">
-                <div className="py-1">
-                  <button className="block w-full text-left px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-300 hover:bg-yellow-500/10 hover:text-yellow-500">
-                    Investment1
-                  </button>
-                  <button className="block w-full text-left px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-300 hover:bg-yellow-500/10 hover:text-yellow-500">
-                    Investment2
-                  </button>
-                  <button className="block w-full text-left px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-gray-300 hover:bg-yellow-500/10 hover:text-yellow-500">
-                    Investment3
-                  </button>
-                </div>
-              </div>
-            )}
+            <div className="mt-2">
+              <select
+                value={selectedInvestmentId}
+                onChange={(e) => {
+                  const selectedId = parseInt(e.target.value);
+                  setSelectedInvestmentId(selectedId);
+                }}
+                className="w-full bg-[rgb(30,30,30)] border border-yellow-500/20 rounded-lg text-white p-2 text-sm"
+              >
+                <option value="" disabled>Select Investment</option>
+                {investments.map((inv, idx) => (
+                  <option key={idx} value={inv.investmentId}>
+                    Investment {inv.investmentId}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+
           </div>
         </div>
 
@@ -224,7 +230,42 @@ const PlanProgress = () => {
 
           {/* Auto-Reinvestment Note */}
           <div className="text-[10px] sm:text-sm text-gray-400 bg-[rgb(20,20,20)] border border-yellow-500 p-2 sm:p-4 rounded">
-            <p>Auto-reinvestment at $100 reserve.</p>
+            {selectedInvestment && (
+              <div className="space-y-3 sm:space-y-6">
+                <div className="text-white p-4 border border-yellow-500/20 rounded-lg">
+                  <p>Investment ID: {selectedInvestment.investmentId}</p>
+                  <p>Days Claimed: {selectedInvestment.daysClaimed}</p>
+                  <p>Days Remaining: {selectedInvestment.daysRemainingInCycle}</p>
+                  <p>Next Claim In: {selectedInvestment.timeUntilClaim}</p>
+                  <p>Can Claim Now: {selectedInvestment.canClaimNow ? "Yes" : "No"}</p>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm text-gray-300">
+                  <Clock className="w-4 h-4 text-yellow-500" />
+                  <span>{selectedInvestment.daysRemainingInCycle} days remaining</span>
+                  <button
+                    disabled={!selectedInvestment.canClaimNow}
+                    onClick={() => {
+                      if (selectedInvestment.canClaimNow) {
+
+                        handleClaim()
+                      }
+                      else {
+                        Swal.fire({
+                          title: 'Auto close alert!',
+                          text: 'I will close in 2 seconds.',
+                          timer: 2000
+                        })
+                      }
+                    }} className={`w-full md:w-[200px] ${selectedInvestment.canClaimNow && selectedInvestment.daysClaimed == 0 ? 'bg-yellow-600 hover:bg-yellow-500' : ''} text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500 `}>
+                    {selectedInvestment.canClaimNow && selectedInvestment.daysClaimed == 0 ? "Claim"
+                      : selectedInvestment.daysClaimed !== 0 ? "Withdrawn"
+                        : `Claim in ${(calculateRemainingDays(selectedInvestment.currentDayOfWeek))} Days (${selectedInvestment.timeUntilClaim})`}
+
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
