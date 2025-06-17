@@ -55,10 +55,10 @@ const BuyTccPanel = () => {
 
       {/* Buy Options */}
       <div className="space-y-3">
-        <button className="w-full bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors border border-yellow-500 flex items-center justify-center gap-2">
+        <a target='_blank' href='https://pancakeswap.finance/swap?chain=bsc&outputCurrency=0xAd771bac597eFac136929195985577Da0C40e557' className="w-full bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors border border-yellow-500 flex items-center justify-center gap-2">
           Buy on PancakeSwap
           <ExternalLink className="h-4 w-4" />
-        </button>
+        </a>
         <button className="w-full ]bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
           Connect Wallet
         </button>

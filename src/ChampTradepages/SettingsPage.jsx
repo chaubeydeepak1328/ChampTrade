@@ -10,9 +10,12 @@ const ProfilePage = () => {
   const [profileData, setProfileData] = useState();
   const { address, isConnected } = useAppKitAccount();
 
-  const referralLink = profileData?.userId
-    ? `${window.location.origin}/referral?ref=TCC${profileData.userId}`
-    : '';
+  // const referralLink = profileData?.userId
+  //   ? `${window.location.origin}/referral?ref=TCC${profileData.userId}`
+  //   : '';
+
+
+
 
   const handleCopyLink = async () => {
     if (!referralLink) return;
@@ -51,7 +54,9 @@ const ProfilePage = () => {
 
   const Profile = useStore((state) => state.Profile)
 
-
+  const referralLink = userAddress
+    ? `${window.location.origin}/referral?ref=TCC${userAddress}`
+    : '';
 
   useEffect(() => {
     const fetchProfileData = async () => {
