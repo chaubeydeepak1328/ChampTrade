@@ -682,7 +682,66 @@ export const useStore = create((set, get) => ({
         } catch (error) {
             console.log(error)
         }
-    }
+    },
+
+
+    myReferral: async (userAddress) => {
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            // Get all direct referrals with level data
+            const directReferralRes = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
+
+            // Get level wise ROI contribution
+            const levelWiseROIRes = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
+
+            // Prepare referral count for each level
+            let referralCount = []; // { level: count }
+
+            for (let i = 0; i < directReferralRes.referrals.length; i++) {
+                const referralAddress = directReferralRes.referrals[i][0];
+                const level = directReferralRes.referrals[i][1];
+                const levelNum = parseInt(level);
+
+                console.log(referralAddress, levelNum)
+
+                // ✅ Initialize count if not exists
+                if (!referralCount[levelNum - 1]) {
+                    referralCount[levelNum - 1] = 1;
+                } else {
+                    referralCount[levelNum - 1]++;
+                }
+            }
+
+            // Prepare final data combining both referral count and level-wise ROI
+            const result = [];
+
+            for (let i = 0; i < levelWiseROIRes.length; i++) {
+                const level = levelWiseROIRes[i][0].toString();
+                const contributionRaw = levelWiseROIRes[i][1].toString();
+
+                // console.log(level, contributionRaw)
+
+
+                const levelNum = parseInt(level);
+                const contributionUSD = parseInt(contributionRaw) / 1e8;
+
+                result.push({
+                    level: levelNum,
+                    totalReferrals: referralCount[levelNum] || 0,  // default 0 if not exist
+                    dailyContribution: contributionUSD.toFixed(2)
+                });
+            }
+
+            console.log("Referral Stats:", result);
+            return result;
+
+        } catch (err) {
+            console.log("Referral fetch error", err);
+            return [];
+        }
+    },
 
 
 

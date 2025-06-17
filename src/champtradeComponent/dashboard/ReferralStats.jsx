@@ -1,20 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Users, ChevronRight, ChevronLeft, Table } from 'lucide-react';
-
+import { useStore } from '../../Store/UserStore';
 
 
 const ReferralStats = () => {
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [viewMode, setViewMode] = useState('cards');
 
-  const referralLevels = [
-    { level: 'L1', walletAddress: '0x1234...5678', isActive: true, dailyContribution: 0.20, totalReferrals: 5 },
-    { level: 'L2', walletAddress: '0x8765...4321', isActive: true, dailyContribution: 1.00, totalReferrals: 25 },
-    { level: 'L3', walletAddress: '0xabcd...efgh', isActive: true, dailyContribution: 5.00, totalReferrals: 125 },
-    { level: 'L4', walletAddress: '0xijkl...mnop', isActive: false, dailyContribution: 0, totalReferrals: 0 },
-    { level: 'L5', walletAddress: '0xqrst...uvwx', isActive: false, dailyContribution: 0, totalReferrals: 0 },
-    { level: 'L6', walletAddress: '0xyzab...cdef', isActive: false, dailyContribution: 0, totalReferrals: 0 },
-  ];
+
 
   const handleLevelClick = (level) => {
     setSelectedLevel(level);
@@ -25,6 +18,35 @@ const ReferralStats = () => {
     setViewMode('cards');
     setSelectedLevel(null);
   };
+
+
+  // ================================================================================
+  // Refferal Come Here 
+  // ================================================================================
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
+
+  const [RefferalDetails, setRefferalDetails] = useState();
+
+  const myReferral = useStore((state) => state.myReferral);
+
+  useEffect(() => {
+    const fetchEarning = async () => {
+      const res = await myReferral(userAddress);
+      console.log(res)
+      setRefferalDetails(res);
+    }
+    fetchEarning();
+  }, [])
+
+  const referralLevels = RefferalDetails?.map((levelData) => ({
+    level: `L${levelData.level}`,
+    isActive: levelData.totalReferrals !== 0,
+    dailyContribution: parseFloat(levelData.dailyContribution),
+    totalReferrals: levelData.totalReferrals
+  })) || [];
+
+
 
   return (
     <div className="bg-[rgb(20,20,20)] rounded-xl p-3 sm:p-6 border-2 border-yellow-500/30 hover:shadow-[0_0_20px_rgb(250,204,21,0.1)] transition-all duration-300">
@@ -142,11 +164,23 @@ const ReferralStats = () => {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
           <div>
             <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Active Referrals</p>
-            <p className="text-lg sm:text-2xl font-bold text-yellow-500">155</p>
+            <p className="text-lg sm:text-2xl font-bold text-yellow-500">
+              {
+                RefferalDetails
+                  ? RefferalDetails.reduce((sum, item) => sum + item.totalReferrals, 0)
+                  : 0
+              }
+            </p>
           </div>
           <div>
             <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Daily Earnings</p>
-            <p className="text-lg sm:text-2xl font-bold text-yellow-500">$6.20</p>
+            <p className="text-lg sm:text-2xl font-bold text-yellow-500">
+              ${
+                RefferalDetails
+                  ? RefferalDetails.reduce((sum, item) => sum + parseFloat(item.dailyContribution), 0).toFixed(2)
+                  : "0.00"
+              }
+            </p>
           </div>
         </div>
       </div>
