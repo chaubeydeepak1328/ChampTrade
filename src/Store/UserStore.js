@@ -619,7 +619,7 @@ export const useStore = create((set, get) => ({
     getUserIndWdrDetails: async (userAddress) => {
         try {
             const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            console.log("==================> TCC_STAKING", TCC_STAKING)
+            // console.log("==================> TCC_STAKING", TCC_STAKING)
 
             const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
             // come in Array format
@@ -649,7 +649,7 @@ export const useStore = create((set, get) => ({
             return invetmentData
 
         } catch (error) {
-            console.log(response)
+            console.log(error)
         }
     },
 
@@ -763,6 +763,40 @@ export const useStore = create((set, get) => ({
             return [];
         }
     },
+
+
+    userInvestmentWithDetails: async (userAddress) => {
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+            if (!TCC_STAKING || !TCC_STAKING.abi || !TCC_STAKING.contractAddress) {
+                throw new Error("TCC_STAKING ABI or address is missing.");
+            }
+
+            console.log("==================> TCC_STAKING", TCC_STAKING);
+
+            const contract = new web3.eth.Contract(
+                TCC_STAKING.abi,
+                TCC_STAKING.contractAddress
+            );
+
+            const investmentWithDetails = await contract.methods
+                .getUserInvestmentsWithDetails(userAddress)
+                .call();
+
+            console.log("Investment with details:", investmentWithDetails);
+
+            if (!Array.isArray(investmentWithDetails)) {
+                throw new Error("Expected array from getUserInvestmentsWithDetails");
+            }
+
+            return investmentWithDetails;
+        } catch (error) {
+            console.error("Error in userInvestmentWithDetails:", error.message || error);
+            return []; // <- ✅ Always return an array to avoid map() crash
+        }
+    },
+
 
 
 

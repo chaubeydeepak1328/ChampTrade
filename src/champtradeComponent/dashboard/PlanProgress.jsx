@@ -9,12 +9,6 @@ const PlanProgress = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const progress = 66.66;
   const daysRemaining = 163;
-  const transactionHistory = [
-    { id: 1, type: 'Deposit', amount: '100 TCC', date: '2023-05-15', status: 'Completed' },
-    { id: 2, type: 'Withdrawal', amount: '50 TCC', date: '2023-05-10', status: 'Completed' },
-    { id: 3, type: 'Reinvestment', amount: '33.33 TCC', date: '2023-05-01', status: 'Pending' },
-    { id: 4, type: 'Bonus', amount: '10 TCC', date: '2023-04-28', status: 'Completed' },
-  ];
 
 
 
@@ -36,7 +30,7 @@ const PlanProgress = () => {
       const res = await getUserIndWdrDetails(userAddress);
 
       // Normalize data properly
-      const normalized = res.map(item => ({
+      const normalized = res?.map(item => ({
         investmentId: Number(item.investmentId),
         canClaimNow: item.canClaimNow,
         daysClaimed: Number(item.daysClaimed),
@@ -99,6 +93,74 @@ const PlanProgress = () => {
       console.log(error)
     }
   }
+
+
+
+  // ================================================================
+  //userInvestmentWithDetails
+  // ================================================================
+
+  const userInvestmentWithDetails = useStore((state) => state.userInvestmentWithDetails)
+
+  const [userInvDet, setUserInvDet] = useState();
+
+
+  useEffect(() => {
+    const getchInvDet = async () => {
+      try {
+        const response = await userInvestmentWithDetails(userAddress);
+        console.log("Raw Response", response);
+
+        // parse each investment tuple
+        const parsed = response.map((inv) => ({
+          investmentID: Number(inv.investmentID),
+          tccPriceDuringInvestment: Number(inv.tccPriceDuringInvestment),
+          investedAmountInUSD: Number(inv.investedAmountInUSD),
+          investedAmountInTCC: Number(inv.investedAmountInTCC),
+          developerFeeTCC: Number(inv.developerFeeTCC),
+          principalInUSD: Number(inv.principalInUSD),
+          principalInTCC: Number(inv.principalInTCC),
+          totalROIReceived: Number(inv.totalROIReceived),
+          totalAccumulatedAmountForInvestment: Number(inv.totalAccumulatedAmountForInvestment),
+          startDay: Number(inv.startDay),
+          roiDaysClaimed: Number(inv.roiDaysClaimed),
+          lastInvestmentTimestamp: Number(inv.lastInvestmentTimestamp),
+          lastReinvestmentDay: Number(inv.lastReinvestmentDay),
+          lastClaimDay: Number(inv.lastClaimDay),
+          lastLevelCapResetDay: Number(inv.lastLevelCapResetDay),
+          isCompleted: inv.isCompleted,
+          claimCount: Number(inv.claimCount),
+          claimedROIs: inv.claimedROIs.map((roi) => ({
+            day: Number(roi.day),
+            amountUsd: Number(roi.amountUsd),
+            amountTcc: Number(roi.amountTcc),
+            claimedAt: Number(roi.claimedAt),
+          })),
+          remainingDays: Number(inv.remainingDays),
+          dailyROIUsd: Number(inv.dailyROIUsd),
+          dailyROITcc: Number(inv.dailyROITcc),
+          totalExpectedROIUsd: Number(inv.totalExpectedROIUsd),
+          totalExpectedROITcc: Number(inv.totalExpectedROITcc),
+        }));
+
+        console.log("Parsed InvestmentView:", parsed);
+        setUserInvDet(parsed);
+      } catch (err) {
+        console.error("Error loading investment view", err);
+      }
+    };
+
+    if (userAddress) getchInvDet();
+  }, [userAddress]);
+
+
+  const transactionHistory = [
+    { id: 1, type: 'Deposit', amount: '100 TCC', date: '2023-05-15', status: 'Completed' },
+    { id: 2, type: 'Withdrawal', amount: '50 TCC', date: '2023-05-10', status: 'Completed' },
+    { id: 3, type: 'Reinvestment', amount: '33.33 TCC', date: '2023-05-01', status: 'Pending' },
+    { id: 4, type: 'Bonus', amount: '10 TCC', date: '2023-04-28', status: 'Completed' },
+  ];
+
 
 
 
@@ -269,41 +331,60 @@ const PlanProgress = () => {
           </div>
         </div>
       </div>
-
-      <div className="space-y-6 max-w-6xl mx-auto mt-4">
+      {/* Purchase History */}
+      <div className="space-y-6  mx-auto mt-4">
         <p className='text-yellow-500 font-bold text-xl'>Purchase History</p>
         {/* New Transaction History Card with Responsive Table */}
         <div className="bg-[rgb(20,20,20)] rounded-xl p-6 border border-yellow-500/20">
           <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
             <RefreshCw className="w-6 h-6 text-yellow-500" />
-            Transaction History
+            Investment Details
           </h3>
 
           {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="min-w-full divide-y divide-yellow-500/20">
-              <thead>
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-yellow-500/20">
+            <table className="min-w-[1600px] divide-y divide-yellow-500/20">
+              <thead className="bg-[rgb(25,25,25)]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">TCC Price</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (USD)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (TCC)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Developer Fee</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (USD)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (TCC)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">ROI Received</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Days Claimed</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Remaining Days</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Daily ROI (USD)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Daily ROI (TCC)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Expected ROI (USD)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Expected ROI (TCC)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-yellow-500/10">
-                {transactionHistory.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-yellow-500/5">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{transaction.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{transaction.type}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{transaction.amount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{transaction.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${transaction.status === 'Completed'
-                        ? 'bg-green-900/50 text-green-400'
-                        : 'bg-yellow-900/50 text-yellow-500'
-                        }`}>
-                        {transaction.status}
+              <tbody className="divide-y divide-yellow-500/10 bg-[rgb(15,15,15)]">
+                {userInvDet?.map((inv, index) => (
+                  <tr key={inv.investmentID || index} className="hover:bg-yellow-500/5">
+                    <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
+                    <td className="px-4 py-3 text-sm text-white">{inv.investmentID}</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment / 1e18).toFixed(4)}</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD / 1e18).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.investedAmountInTCC / 1e18).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.developerFeeTCC / 1e18).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.principalInUSD / 1e18).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC / 1e18).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.totalROIReceived / 1e18).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{inv.roiDaysClaimed}</td>
+                    <td className="px-4 py-3 text-sm text-white">{inv.remainingDays}</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.dailyROIUsd / 1e18).toFixed(4)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.dailyROITcc / 1e18).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.totalExpectedROIUsd / 1e18).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.totalExpectedROITcc / 1e18).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm">
+                      <span className={`px-2 py-1 text-xs rounded-full ${inv.isCompleted ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-500'}`}>
+                        {inv.isCompleted ? 'Completed' : 'Active'}
                       </span>
                     </td>
                   </tr>
@@ -312,40 +393,120 @@ const PlanProgress = () => {
             </table>
           </div>
 
+
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">
-            {transactionHistory.map((transaction) => (
-              <div key={transaction.id} className="bg-[rgb(30,30,30)] p-4 rounded-lg border border-yellow-500/20">
+            {userInvDet?.map((inv, index) => (
+              <div key={inv.investmentID || index} className="bg-[rgb(30,30,30)] p-4 rounded-lg border border-yellow-500/20">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-xs text-yellow-500">ID</p>
-                    <p className="text-sm text-white">{transaction.id}</p>
+                    <p className="text-xs text-yellow-500">S. No</p>
+                    <p className="text-sm text-white">{index + 1}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-yellow-500">Type</p>
-                    <p className="text-sm text-white">{transaction.type}</p>
+                    <p className="text-xs text-yellow-500">Investment ID</p>
+                    <p className="text-sm text-white">{inv.investmentID}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-yellow-500">Amount</p>
-                    <p className="text-sm text-white">{transaction.amount}</p>
+                    <p className="text-xs text-yellow-500">TCC Price (at time)</p>
+                    <p className="text-sm text-white">${(inv.tccPriceDuringInvestment / 1e18).toFixed(4)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-yellow-500">Date</p>
-                    <p className="text-sm text-white">{transaction.date}</p>
+                    <p className="text-xs text-yellow-500">Invested USD</p>
+                    <p className="text-sm text-white">${(inv.investedAmountInUSD / 1e18).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Invested TCC</p>
+                    <p className="text-sm text-white">{(inv.investedAmountInTCC / 1e18).toFixed(4)} TCC</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Developer Fee (TCC)</p>
+                    <p className="text-sm text-white">{(inv.developerFeeTCC / 1e18).toFixed(4)} TCC</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Principal USD</p>
+                    <p className="text-sm text-white">${(inv.principalInUSD / 1e18).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Principal TCC</p>
+                    <p className="text-sm text-white">{(inv.principalInTCC / 1e18).toFixed(4)} TCC</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">ROI Received</p>
+                    <p className="text-sm text-white">${(inv.totalROIReceived / 1e18).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Accumulated Total</p>
+                    <p className="text-sm text-white">${(inv.totalAccumulatedAmountForInvestment / 1e18).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Start Day</p>
+                    <p className="text-sm text-white">{inv.startDay}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">ROI Days Claimed</p>
+                    <p className="text-sm text-white">{inv.roiDaysClaimed}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Last Invested (timestamp)</p>
+                    <p className="text-sm text-white">{inv.lastInvestmentTimestamp}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Last Reinvest Day</p>
+                    <p className="text-sm text-white">{inv.lastReinvestmentDay}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Last Claim Day</p>
+                    <p className="text-sm text-white">{inv.lastClaimDay}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Cap Reset Day</p>
+                    <p className="text-sm text-white">{inv.lastLevelCapResetDay}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Completed</p>
+                    <p className="text-sm text-white">{inv.isCompleted ? "Yes" : "No"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claim Count</p>
+                    <p className="text-sm text-white">{inv.claimCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Remaining Days</p>
+                    <p className="text-sm text-white">{inv.remainingDays}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Daily ROI (USD)</p>
+                    <p className="text-sm text-white">${(inv.dailyROIUsd / 1e18).toFixed(4)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Daily ROI (TCC)</p>
+                    <p className="text-sm text-white">{(inv.dailyROITcc / 1e18).toFixed(4)} TCC</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Total Expected ROI (USD)</p>
+                    <p className="text-sm text-white">${(inv.totalExpectedROIUsd / 1e18).toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Total Expected ROI (TCC)</p>
+                    <p className="text-sm text-white">{(inv.totalExpectedROITcc / 1e18).toFixed(4)} TCC</p>
                   </div>
                 </div>
+
+                {/* Optional Status */}
                 <div className="mt-3">
                   <p className="text-xs text-yellow-500">Status</p>
-                  <span className={`px-2 py-1 text-xs rounded-full ${transaction.status === 'Completed'
-                    ? 'bg-green-900/50 text-green-400'
-                    : 'bg-yellow-900/50 text-yellow-500'
-                    }`}>
-                    {transaction.status}
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${inv.isCompleted ? "bg-green-900/50 text-green-400" : "bg-yellow-900/50 text-yellow-500"
+                      }`}
+                  >
+                    {inv.isCompleted ? "Completed" : "Active"}
                   </span>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
       </div>
 
