@@ -42,29 +42,45 @@ const API_KEY = "3KMDJQENA1C2NXCVWZAU2DB4MAKT1AYCPJ"
 
 const fetchContractAbi = async (contractName) => {
     try {
-        const response = await fetch(`https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${Contract[contractName]}&apikey=${API_KEY}`);
+        const address = Contract[contractName];
+        if (!address) throw new Error(`No address found for contract: ${contractName}`);
+
+        const response = await fetch(
+            `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${address}&apikey=${API_KEY}`
+        );
         const data = await response.json();
-        // console.log("proxy Address, contract Address", Contract[contractName], data?.implementations[0].address);
+        const result = data?.result?.[0];
 
-        const contractAdress = data?.result[0]?.Implementation;
+        if (!result) throw new Error("No result from BscScan");
 
-        if (contractAdress) {
-            const res = await fetch(`https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAdress}&apikey=${API_KEY}`);
-            const data1 = await res.json();
-
-            const parsedAbi = JSON.parse(data1?.result[0]?.ABI);
-
-            return {
-                abi: parsedAbi,
-                contractAddress: Contract[contractName]
-            };
+        // If it's a proxy, get implementation ABI
+        let abiJson;
+        if (result.Implementation) {
+            const resImpl = await fetch(
+                `https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${result.Implementation}&apikey=${API_KEY}`
+            );
+            const implData = await resImpl.json();
+            abiJson = implData?.result?.[0]?.ABI;
+        } else {
+            abiJson = result.ABI;
         }
 
+        // 🚨 Guard clause for undefined or empty ABI
+        if (!abiJson || abiJson === "undefined") {
+            throw new Error("ABI not available or returned as 'undefined'");
+        }
+
+        const parsedAbi = JSON.parse(abiJson);
+
+        return {
+            abi: parsedAbi,
+            contractAddress: address,
+        };
     } catch (error) {
-        console.error("Error fetching contract ABI:", error);
-        throw error;
+        console.error(`❌ Error fetching ABI for ${contractName}:`, error.message || error);
+        return null; // Return null so your Zustand methods can handle it safely
     }
-}
+};
 
 
 
@@ -491,36 +507,7 @@ export const useStore = create((set, get) => ({
     },
 
 
-    // UserCompletedStakes: async (userAddress) => {
-    //     try {
 
-    //         const contract = new web3.eth.Contract(TCC_STAKIN_ABI, Contract["TCC_STAKING"]);
-
-    //         // Call the contract method
-    //         const res = await contract.methods.getUserCompletedStakes(userAddress).call();
-    //         console.log(res)
-
-    //         const data = res.map((curElm) => {
-    //             return {
-    //                 stakeId: curElm.stakeId,
-    //                 amount: web3.utils.fromWei(curElm.amount, "ether"),
-    //                 startTime: parseInt(curElm.startTime),
-    //                 lockPeriod: parseInt(curElm.lockPeriod),
-    //                 unlockTime: parseInt(curElm.unlockTime),
-    //                 totalInterest: web3.utils.fromWei(curElm.totalInterest, "ether"),
-    //                 interestEarnedTillNow: web3.utils.fromWei(curElm.interestEarnedTillNow, "ether"),
-    //                 isUnlocked: curElm.isUnlocked.toString(),
-    //                 withdrawn: curElm.withdrawn,
-    //             };
-    //         });
-
-    //         return data;
-
-    //     } catch (error) {
-    //         console.log(error);
-    //         return [];
-    //     }
-    // },
 
 
     Profile: async (userAddress) => {
@@ -767,35 +754,36 @@ export const useStore = create((set, get) => ({
 
     userInvestmentWithDetails: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            if (!userAddress) throw new Error("User address is required.");
 
-            if (!TCC_STAKING || !TCC_STAKING.abi || !TCC_STAKING.contractAddress) {
-                throw new Error("TCC_STAKING ABI or address is missing.");
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+
+            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+                console.warn("TCC_STAKING ABI or address missing.");
+                return [];
             }
 
-            console.log("==================> TCC_STAKING", TCC_STAKING);
 
-            const contract = new web3.eth.Contract(
-                TCC_STAKING.abi,
-                TCC_STAKING.contractAddress
-            );
 
             const investmentWithDetails = await contract.methods
                 .getUserInvestmentsWithDetails(userAddress)
                 .call();
 
-            console.log("Investment with details:", investmentWithDetails);
-
             if (!Array.isArray(investmentWithDetails)) {
-                throw new Error("Expected array from getUserInvestmentsWithDetails");
+                console.warn("Expected array from getUserInvestmentsWithDetails, got:", investmentWithDetails);
+                return [];
             }
 
+            console.log("✅ Fetched investment details:", investmentWithDetails);
             return investmentWithDetails;
         } catch (error) {
-            console.error("Error in userInvestmentWithDetails:", error.message || error);
-            return []; // <- ✅ Always return an array to avoid map() crash
+            console.error("❌ Error in userInvestmentWithDetails:", error.message || error);
+            return []; // Always return safe fallback
         }
-    },
+    }
+
 
 
 

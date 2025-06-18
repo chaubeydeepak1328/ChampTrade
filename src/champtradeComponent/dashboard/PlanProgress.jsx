@@ -10,6 +10,8 @@ const PlanProgress = () => {
   const progress = 66.66;
   const daysRemaining = 163;
 
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
 
 
   // ================================================================
@@ -19,8 +21,8 @@ const PlanProgress = () => {
   const [selectedInvestmentId, setSelectedInvestmentId] = useState('');
   const [investments, setInvestments] = useState([]);
 
-  const userData = JSON.parse(localStorage.getItem("userData") || "null");
-  const userAddress = userData?.userAddress || null;
+
+
 
   const getUserIndWdrDetails = useStore((state) => state.getUserIndWdrDetails);
 
@@ -41,7 +43,7 @@ const PlanProgress = () => {
 
       setInvestments(normalized);
 
-      if (normalized.length > 0) {
+      if (normalized?.length > 0) {
         setSelectedInvestmentId(normalized[0].investmentId);
       }
     };
@@ -50,20 +52,13 @@ const PlanProgress = () => {
 
   }, [userAddress]);
 
-  const selectedInvestment = investments.find(inv => inv.investmentId === selectedInvestmentId);
-
-  function calculateRemainingDays(currentDayOfWeek) {
-    return (7 - parseInt(currentDayOfWeek)) % 7;
-  }
+  const selectedInvestment = investments?.find(inv => inv.investmentId === selectedInvestmentId);
 
 
   // ================================================================
   // Claim Earning ROI
   // ================================================================
 
-  function calculateRemainingDays(currentDayOfWeek) {
-    return (7 - currentDayOfWeek) % 7;
-  }
 
   const { handleSendTx, hash } = useTransaction()
 
@@ -102,12 +97,13 @@ const PlanProgress = () => {
 
   const userInvestmentWithDetails = useStore((state) => state.userInvestmentWithDetails)
 
-  const [userInvDet, setUserInvDet] = useState();
+  const [userInvDet, setUserInvDet] = useState([]);
 
 
   useEffect(() => {
     const getchInvDet = async () => {
       try {
+
         const response = await userInvestmentWithDetails(userAddress);
         console.log("Raw Response", response);
 
@@ -152,14 +148,6 @@ const PlanProgress = () => {
 
     if (userAddress) getchInvDet();
   }, [userAddress]);
-
-
-  const transactionHistory = [
-    { id: 1, type: 'Deposit', amount: '100 TCC', date: '2023-05-15', status: 'Completed' },
-    { id: 2, type: 'Withdrawal', amount: '50 TCC', date: '2023-05-10', status: 'Completed' },
-    { id: 3, type: 'Reinvestment', amount: '33.33 TCC', date: '2023-05-01', status: 'Pending' },
-    { id: 4, type: 'Bonus', amount: '10 TCC', date: '2023-04-28', status: 'Completed' },
-  ];
 
 
 
@@ -237,7 +225,7 @@ const PlanProgress = () => {
                 className="w-full bg-[rgb(30,30,30)] border border-yellow-500/20 rounded-lg text-white p-2 text-sm"
               >
                 <option value="" disabled>Select Investment</option>
-                {investments.map((inv, idx) => (
+                {investments?.map((inv, idx) => (
                   <option key={idx} value={inv.investmentId}>
                     Investment {inv.investmentId}
                   </option>
@@ -271,24 +259,7 @@ const PlanProgress = () => {
             <span>{daysRemaining} days remaining</span>
           </div>
 
-          {/* Milestones */}
-          <div className="space-y-1 sm:space-y-3">
-            <h4 className="text-white font-semibold text-xs sm:text-base">Milestones</h4>
-            <div className="grid grid-cols-3 gap-1 sm:gap-4">
-              <div className="text-center p-1 sm:p-2 bg-[rgb(20,20,20)] border border-yellow-500 rounded">
-                <div className="text-yellow-500 font-bold text-xs sm:text-base">Year 1</div>
-                <div className="text-[10px] sm:text-sm text-gray-400">$33.33</div>
-              </div>
-              <div className="text-center p-1 sm:p-2 bg-[rgb(20,20,20)] border border-yellow-500 rounded">
-                <div className="text-yellow-500 font-bold text-xs sm:text-base">Year 2</div>
-                <div className="text-[10px] sm:text-sm text-gray-400">$66.66</div>
-              </div>
-              <div className="text-center p-1 sm:p-2 bg-[rgb(20,20,20)] border border-yellow-500 rounded">
-                <div className="text-yellow-500 font-bold text-xs sm:text-base">Year 3</div>
-                <div className="text-[10px] sm:text-sm text-gray-400">$100.00</div>
-              </div>
-            </div>
-          </div>
+
 
           {/* Auto-Reinvestment Note */}
           <div className="text-[10px] sm:text-sm text-gray-400 bg-[rgb(20,20,20)] border border-yellow-500 p-2 sm:p-4 rounded">
