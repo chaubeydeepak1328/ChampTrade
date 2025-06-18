@@ -87,7 +87,7 @@ const TeamOverview = () => {
       </div>
 
       {/* Growth Metrics */}
-      <div className="bg-[rgb(20,20,20)] p-6 rounded-xl border-2 border-yellow-500/20">
+      {/* <div className="bg-[rgb(20,20,20)] p-6 rounded-xl border-2 border-yellow-500/20">
         <h3 className="text-lg font-semibold text-white mb-4">
           <span className="bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">
             Team Growth
@@ -103,10 +103,10 @@ const TeamOverview = () => {
             <p className="text-xl font-bold text-green-400">{teamStats.monthlyGrowth}</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Recent Activity */}
-      <div className="bg-[rgb(20,20,20)] p-6 rounded-xl border-2 border-yellow-500/20">
+      {/* <div className="bg-[rgb(20,20,20)] p-6 rounded-xl border-2 border-yellow-500/20">
         <h3 className="text-lg font-semibold text-white mb-4">
           <span className="bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">
             Recent Team Activity
@@ -135,7 +135,7 @@ const TeamOverview = () => {
             <span className="text-sm text-yellow-500/80">1 day ago</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

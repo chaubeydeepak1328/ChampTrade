@@ -7,8 +7,7 @@ import { useTransaction } from '../../config/register';
 const PlanProgress = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  const progress = 66.66;
-  const daysRemaining = 163;
+
 
   const userData = JSON.parse(localStorage.getItem("userData") || "null");
   const userAddress = userData?.userAddress || null;
@@ -150,6 +149,11 @@ const PlanProgress = () => {
   }, [userAddress]);
 
 
+  const TOTAL_DAYS = 940;
+
+  const claimedDays = TOTAL_DAYS - selectedInvestment?.daysRemainingInCycle || 0;
+  const progress = (claimedDays / TOTAL_DAYS) * 100;
+
 
 
 
@@ -243,7 +247,9 @@ const PlanProgress = () => {
           <div>
             <div className="flex justify-between text-xs text-gray-400 mb-1">
               <span>Progress</span>
-              <span>${progress.toFixed(2)} / $100.00</span>
+              <span>{claimedDays} / {TOTAL_DAYS} days</span>
+
+
             </div>
             <div className="h-2 sm:h-4 bg-[rgb(20,20,20)] border border-yellow-500 rounded-full overflow-hidden">
               <div
@@ -256,7 +262,12 @@ const PlanProgress = () => {
           {/* Time Remaining */}
           <div className="flex items-center gap-1 sm:gap-3 text-xs sm:text-base text-gray-300">
             <Clock className="w-3 h-3 sm:w-5 sm:h-5 text-yellow-500" />
-            <span>{daysRemaining} days remaining</span>
+            <span>
+              {selectedInvestment
+                ? `${selectedInvestment.daysRemainingInCycle} days remaining`
+                : "Loading..."}
+            </span>
+
           </div>
 
 

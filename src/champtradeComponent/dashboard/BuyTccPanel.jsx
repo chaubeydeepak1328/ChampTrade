@@ -65,7 +65,7 @@ const BuyTccPanel = () => {
       </div>
 
       {/* Market Info */}
-      <div className="bg-[rgba(20,20,20,0)] border border-yellow-500/50 p-6 rounded-lg ">
+      {/* <div className="bg-[rgba(20,20,20,0)] border border-yellow-500/50 p-6 rounded-lg ">
         <h3 className="text-lg font-semibold text-white mb-4">Market Info</h3>
         <div className="space-y-3">
           <div className="flex justify-between">
@@ -81,7 +81,7 @@ const BuyTccPanel = () => {
             <span className="font-medium text-white">123.4M TCC</span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

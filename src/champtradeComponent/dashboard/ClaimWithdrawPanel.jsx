@@ -70,9 +70,9 @@ const ClaimWithdrawPanel = () => {
         <button className="w-full bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors border border-yellow-500">
           Claim All Rewards
         </button>
-        <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
+        {/* <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
           Withdraw to Wallet
-        </button>
+        </button> */}
       </div>
 
       {/* Important Notice */}

@@ -7,9 +7,9 @@ function DashboardOverviewPage() {
   return (
     <div className="space-y-6">
       <MyOverviewWidgets />
-      <Panel title="Latest Transactions">
+      {/* <Panel title="Latest Transactions">
         <LatestTransactionsPanel />
-      </Panel>
+      </Panel> */}
     </div>
   );
 }

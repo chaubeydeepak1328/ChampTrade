@@ -184,9 +184,9 @@ const EarningsBreakdown = () => {
 
       <div className="space-y-4 px-1 sm:px-0">
         {/* Chart Container */}
-        <div className="h-64 sm:h-80 bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] rounded-lg border border-yellow-500/10 p-2">
+        {/* <div className="h-64 sm:h-80 bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] rounded-lg border border-yellow-500/10 p-2">
           <canvas ref={chartRef} className="w-full h-full" />
-        </div>
+        </div> */}
 
         {/* Stats Cards - Stack on mobile */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
