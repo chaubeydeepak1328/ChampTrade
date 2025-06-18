@@ -64,7 +64,7 @@ const PaymentApproval = ({ onApprove, packageAmount, packageName, loading }) => 
                 </div>
             </div>
 
-            <div className="mb-6">
+            {/* <div className="mb-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Select Payment Method</h3>
                 <div className="space-y-3">
                     <label className="flex items-center p-4 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer hover:border-yellow-500 transition-colors">
@@ -107,7 +107,7 @@ const PaymentApproval = ({ onApprove, packageAmount, packageName, loading }) => 
                         </div>
                     </label>
                 </div>
-            </div>
+            </div> */}
 
             <button
                 onClick={handlePaymentApproval}

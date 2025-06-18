@@ -10,15 +10,25 @@ import TCC_TEST_ABI from './TEST_CONTRACT.json';
 
 
 
-const INFURA_URL = "https://bsc-testnet.infura.io/v3/32193d86ae664f1188540cfca7b790cf"
+// const INFURA_URL = "https://bsc-testnet.infura.io/v3/32193d86ae664f1188540cfca7b790cf"
+// const web3 = new Web3(INFURA_URL);
+
+
+const INFURA_URL = "https://bsc-mainnet.infura.io/v3/32193d86ae664f1188540cfca7b790cf";
 const web3 = new Web3(INFURA_URL);
 
+// const Contract = {
+//     "TCC_STAKING": "0x342e8CAcdaC1d4fC6b8d646aF0D23fAc4F16a69c",
+//     "TCC_TEST": "0xb1480314d22d172E1f77a73fE3a14F307CD088c6",
+// }
 
 
 const Contract = {
-    "TCC_STAKING": "0x342e8CAcdaC1d4fC6b8d646aF0D23fAc4F16a69c",
-    "TCC_TEST": "0xb1480314d22d172E1f77a73fE3a14F307CD088c6",
+    "TCC_STAKING": "0xEFBFcf8fEc86f68B6a1625734dD1E94421316901",
+    "TCC_TEST": "0xAd771bac597eFac136929195985577Da0C40e557",
 }
+
+
 
 
 
@@ -26,16 +36,20 @@ const Contract = {
 const API_KEY = "3KMDJQENA1C2NXCVWZAU2DB4MAKT1AYCPJ"
 
 
+
+// const response = await fetch(`https://api-testnet.bscscan.com/api?module=contract&action=getsourcecode&address=${Contract[contractName]}&apikey=${API_KEY}`);
+
+
 const fetchContractAbi = async (contractName) => {
     try {
-        const response = await fetch(`https://api-testnet.bscscan.com/api?module=contract&action=getsourcecode&address=${Contract[contractName]}&apikey=${API_KEY}`);
+        const response = await fetch(`https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${Contract[contractName]}&apikey=${API_KEY}`);
         const data = await response.json();
         // console.log("proxy Address, contract Address", Contract[contractName], data?.implementations[0].address);
 
         const contractAdress = data?.result[0]?.Implementation;
 
         if (contractAdress) {
-            const res = await fetch(`https://api-testnet.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAdress}&apikey=${API_KEY}`);
+            const res = await fetch(`https://api.bscscan.com/api?module=contract&action=getsourcecode&address=${contractAdress}&apikey=${API_KEY}`);
             const data1 = await res.json();
 
             const parsedAbi = JSON.parse(data1?.result[0]?.ABI);
@@ -198,7 +212,7 @@ export const useStore = create((set, get) => ({
             requiredTcc: parseInt(web3.utils.fromWei(requiredTcc, "ether")).toString(),
             approvedAmt: parseInt(web3.utils.fromWei(approvedAmt, "ether")).toString(),
             userBalance: parseInt(web3.utils.fromWei(userBalance, "ether")).toString(),
-            TccPriceUsd: parseFloat(BigInt(TccPriceUsd) / BigInt(1000000)),
+            TccPriceUsd: parseFloat(parseFloat(TccPriceUsd) / parseFloat(1e8)).toFixed(4),
 
 
         };
@@ -584,7 +598,7 @@ export const useStore = create((set, get) => ({
 
         const data = {
             userBalance: parseInt(web3.utils.fromWei(userBalance, "ether")).toString(),
-            TccPriceUsd: parseFloat(BigInt(TccPriceUsd) / BigInt(1000000)),
+            TccPriceUsd: parseFloat(parseFloat(TccPriceUsd) / parseFloat(1e8)).toFixed(4),
 
 
 

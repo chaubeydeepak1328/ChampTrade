@@ -182,7 +182,7 @@ const RegisterPage = () => {
     const stepLabels = ['Payment', 'Sponsor', 'Register', 'Complete'];
     const packageDetails = {
         name: 'Starter Package',
-        amount: 100
+        amount: 110
     };
 
 

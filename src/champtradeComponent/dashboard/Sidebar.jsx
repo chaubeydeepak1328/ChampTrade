@@ -123,10 +123,10 @@ function Sidebar() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-golden" />
                   <span className="text-sm text-golden-white">Cycle: 1 (163 days left)</span>
-                </div>
+                </div> */}
 
                 {userAddress && (
                   <div className="flex items-center gap-2">

@@ -101,7 +101,7 @@ const NavLinks = ({ isScrolled }) => {
       <a href="/" className={linkClass}>
         Home
       </a>
-      <div className="relative group">
+      {/* <div className="relative group">
         <button
           className={`${linkClass} flex items-center`}
           onClick={() => setProductsOpen(!productsOpen)}
@@ -114,16 +114,16 @@ const NavLinks = ({ isScrolled }) => {
             <a href="champ-trade" className="block px-4 py-2 text-sm text-neutral-300 hover:text-yellow-500 hover:bg-yellow-500/10">CHAMP TRADE</a>
           </div>
         </div>
-      </div>
+      </div> */}
       <a href="/services" className={linkClass}>
         Services
       </a>
       <a href="/about" className={linkClass}>
         About
       </a>
-      <a href="/contact" className={linkClass}>
+      {/* <a href="/contact" className={linkClass}>
         Contact
-      </a>
+      </a> */}
     </>
   );
 };
@@ -140,7 +140,7 @@ const MobileNavLinks = ({ setIsOpen }) => {
       >
         Home
       </a>
-      <div>
+      {/* <div>
         <button
           className="flex items-center justify-between w-full font-medium text-white hover:text-yellow-500"
           onClick={() => setProductsOpen(!productsOpen)}
@@ -151,7 +151,7 @@ const MobileNavLinks = ({ setIsOpen }) => {
           <a href="/Private-sale-dashboard" className="block text-neutral-400 hover:text-yellow-500" onClick={() => setIsOpen(false)}>PRIVATE SALE</a>
           <a href="/champ-trade" className="block text-neutral-400 hover:text-yellow-500" onClick={() => setIsOpen(false)}>CHAMP TRADE</a>
         </div>
-      </div>
+      </div> */}
       <a
         href="/services"
         className="block font-medium text-white hover:text-yellow-500"
@@ -166,13 +166,13 @@ const MobileNavLinks = ({ setIsOpen }) => {
       >
         About
       </a>
-      <a
+      {/* <a
         href="/contact"
         className="block font-medium text-white hover:text-yellow-500"
         onClick={() => setIsOpen(false)}
       >
         Contact
-      </a>
+      </a> */}
     </>
   );
 };

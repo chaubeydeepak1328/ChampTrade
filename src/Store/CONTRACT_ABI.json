@@ -1,39 +1,13 @@
 [
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_tccToken",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_usdtToken",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_pancakeSwapRouter",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_developerWallet",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_dailyRoiPercentage",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256[]",
-                "name": "_rewardTiers",
-                "type": "uint256[]"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
+        "inputs": [],
+        "name": "InvalidInitialization",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "NotInitializing",
+        "type": "error"
     },
     {
         "inputs": [
@@ -148,6 +122,19 @@
         "anonymous": false,
         "inputs": [
             {
+                "indexed": false,
+                "internalType": "uint64",
+                "name": "version",
+                "type": "uint64"
+            }
+        ],
+        "name": "Initialized",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
                 "indexed": true,
                 "internalType": "address",
                 "name": "user",
@@ -173,6 +160,31 @@
             }
         ],
         "name": "InvestmentMade",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "totalTCC",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "totalUSD",
+                "type": "uint256"
+            }
+        ],
+        "name": "LevelROIClaimed",
         "type": "event"
     },
     {
@@ -475,6 +487,35 @@
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "TCCPriceMap",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "TOTAL_ROI_DAYS",
         "outputs": [
@@ -488,31 +529,20 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
-            }
-        ],
-        "name": "adminCheckUserRewardEligibility",
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "eligibleForAnyReward",
-                "type": "bool"
-            },
-            {
-                "internalType": "uint256[]",
-                "name": "achievedTiers",
-                "type": "uint256[]"
-            }
-        ],
-        "stateMutability": "view",
+        "inputs": [],
+        "name": "claimLevelROI",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
-        "inputs": [],
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "investmentID",
+                "type": "uint256"
+            }
+        ],
         "name": "claimRoi",
         "outputs": [],
         "stateMutability": "nonpayable",
@@ -525,83 +555,6 @@
             {
                 "internalType": "uint256",
                 "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "debugCurrentDayInfo",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "timestamp",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "currentDay",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "dayOfWeek",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "isSunday",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_amountTcc",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "calledby",
-                "type": "address"
-            }
-        ],
-        "name": "debugInvestment",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "currentPrice",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "actualValue",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "lowerBound",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "upperBound",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "withinBounds",
-                "type": "bool"
-            },
-            {
-                "internalType": "uint256",
-                "name": "allowance",
                 "type": "uint256"
             }
         ],
@@ -629,24 +582,28 @@
                 "type": "address"
             }
         ],
-        "name": "getAccumulatedLevelRoi",
+        "name": "getAllDirectReferralsWithCounts",
         "outputs": [
             {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getBlockTimeStamp",
-        "outputs": [
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "addr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "downlineCount",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.DirectReferralInfo[]",
+                "name": "referrals",
+                "type": "tuple[]"
+            },
             {
                 "internalType": "uint256",
-                "name": "",
+                "name": "totalReferrals",
                 "type": "uint256"
             }
         ],
@@ -656,17 +613,44 @@
     {
         "inputs": [
             {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "investmentID",
+                "type": "uint256"
             }
         ],
-        "name": "getCurrentDailyLevelRoiEarned",
+        "name": "getClaimHistory",
         "outputs": [
             {
-                "internalType": "uint256",
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "id",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amountInUSD",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "amountInTCC",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "roiDaysClaimed",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "claimedAt",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.ClaimedROI[]",
                 "name": "",
-                "type": "uint256"
+                "type": "tuple[]"
             }
         ],
         "stateMutability": "view",
@@ -715,45 +699,6 @@
                 "internalType": "address",
                 "name": "_user",
                 "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_pageNumber",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_pageSize",
-                "type": "uint256"
-            }
-        ],
-        "name": "getDirectReferrals",
-        "outputs": [
-            {
-                "internalType": "address[]",
-                "name": "directReferrals",
-                "type": "address[]"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalDirectReferrals",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalPages",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
             }
         ],
         "name": "getDirectSponsor",
@@ -768,21 +713,106 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "getFixedDailyRoiAmountsUsd",
-        "outputs": [
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
             {
                 "internalType": "uint256",
-                "name": "dailyDirectPayoutUsd",
+                "name": "_investmentID",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "dailyReinvestmentUsd",
+                "name": "_weekStartTimestamp",
                 "type": "uint256"
             }
         ],
-        "stateMutability": "pure",
+        "name": "getInvestmentWeekROI",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "investmentID",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "investedAmountTCC",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "investedAmountUSD",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalRoiTcc",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalRoiUsd",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalReinvestedAmount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "daysCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "day",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "date",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "tccPrice",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "roiUsd",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "roiTcc",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "isClaimed",
+                                "type": "bool"
+                            }
+                        ],
+                        "internalType": "struct TCCInvestmentReward.DailyROIDetail[]",
+                        "name": "dailyROIs",
+                        "type": "tuple[]"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.InvestmentWeekROI",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -822,6 +852,11 @@
                 "internalType": "address",
                 "name": "_user",
                 "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_investmentID",
+                "type": "uint256"
             }
         ],
         "name": "getNextClaimInfo",
@@ -871,17 +906,50 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "getNextClaimRoiTimestamp",
-        "outputs": [
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            },
             {
                 "internalType": "uint256",
-                "name": "nextClaimTimestamp",
+                "name": "_page",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "minutesFromNow",
+                "name": "_perPage",
+                "type": "uint256"
+            }
+        ],
+        "name": "getPaginatedDirectReferralsWithCounts",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "address",
+                        "name": "addr",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "downlineCount",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.DirectReferralInfo[]",
+                "name": "referrals",
+                "type": "tuple[]"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalReferrals",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalPages",
                 "type": "uint256"
             }
         ],
@@ -941,12 +1009,246 @@
                 "type": "address"
             }
         ],
-        "name": "getUserAllRewardStatuses",
+        "name": "getUserComprehensiveStats",
         "outputs": [
             {
-                "internalType": "bool[]",
+                "components": [
+                    {
+                        "internalType": "uint256[6]",
+                        "name": "levelWiseEarnings",
+                        "type": "uint256[6]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalLevelEarnings",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalEarnings",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalReserveFund",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalInvestments",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalDailyROI",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalReinvestmentReserve",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalActiveReferrals",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "daysRemainingUntilCycleComplete",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalTodayIncome",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.UserInvestmentStats",
                 "name": "",
-                "type": "bool[]"
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserInvestmentIDs",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "getUserInvestmentsWithDetails",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "investmentID",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "tccPriceDuringInvestment",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "investedAmountInUSD",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "investedAmountInTCC",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "developerFeeTCC",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "principalInUSD",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "principalInTCC",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalROIReceived",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalAccumulatedAmountForInvestment",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "startDay",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "roiDaysClaimed",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lastInvestmentTimestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lastReinvestmentDay",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lastClaimDay",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "lastLevelCapResetDay",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isCompleted",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "claimCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "id",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "amountInUSD",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "amountInTCC",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "roiDaysClaimed",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "claimedAt",
+                                "type": "uint256"
+                            }
+                        ],
+                        "internalType": "struct TCCInvestmentReward.ClaimedROI[]",
+                        "name": "claimedROIs",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "remainingDays",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "dailyROIUsd",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "dailyROITcc",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalExpectedROIUsd",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalExpectedROITcc",
+                        "type": "uint256"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.InvestmentView[]",
+                "name": "",
+                "type": "tuple[]"
             }
         ],
         "stateMutability": "view",
@@ -961,11 +1263,162 @@
             },
             {
                 "internalType": "uint256",
-                "name": "_tier",
+                "name": "_weekStartTimestamp",
                 "type": "uint256"
             }
         ],
-        "name": "getUserRewardStatus",
+        "name": "getWeekLevelIncome",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "components": [
+                            {
+                                "internalType": "uint256",
+                                "name": "day",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "date",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "address",
+                                "name": "fromUser",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "fromInvestmentID",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "level",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "tccPrice",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "roiUsd",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "uint256",
+                                "name": "roiTcc",
+                                "type": "uint256"
+                            },
+                            {
+                                "internalType": "bool",
+                                "name": "isClaimed",
+                                "type": "bool"
+                            }
+                        ],
+                        "internalType": "struct TCCInvestmentReward.LevelIncomeDayDetail[]",
+                        "name": "dailyIncomes",
+                        "type": "tuple[]"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalRoiTcc",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "totalRoiUsd",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "daysCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "uniqueUsersCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "uniqueInvestmentsCount",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address[]",
+                        "name": "uniqueUsers",
+                        "type": "address[]"
+                    },
+                    {
+                        "internalType": "uint256[]",
+                        "name": "uniqueInvestmentIDs",
+                        "type": "uint256[]"
+                    }
+                ],
+                "internalType": "struct TCCInvestmentReward.WeekLevelIncomeSummary",
+                "name": "",
+                "type": "tuple"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_tccToken",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_usdtToken",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_pancakeSwapRouter",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_developerWallet",
+                "type": "address"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_dailyRoiPercentage",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "_rewardTiers",
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "address",
+                "name": "_tccPriceManager",
+                "type": "address"
+            }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "investmentMap",
         "outputs": [
             {
                 "internalType": "bool",
@@ -977,126 +1430,16 @@
         "type": "function"
     },
     {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
-            }
-        ],
-        "name": "getUserRoiProgress",
+        "inputs": [],
+        "name": "isPriceManagedByAdmin",
         "outputs": [
             {
-                "internalType": "uint256",
-                "name": "totalDaysClaimedInCurrentCycle",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalDirectPayoutUsdCurrentCycle",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalReinvestmentUsdCurrentCycle",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalTccInvested",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_user",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "_startDay",
-                "type": "uint256"
-            }
-        ],
-        "name": "getWeeklyRoiSummary",
-        "outputs": [
-            {
-                "components": [
-                    {
-                        "internalType": "uint256",
-                        "name": "day",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "bool",
-                        "name": "isSunday",
-                        "type": "bool"
-                    },
-                    {
-                        "internalType": "bool",
-                        "name": "isRoiClaimable",
-                        "type": "bool"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "principalUsd",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "expectedDirectPayoutUsd",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "expectedReinvestmentUsd",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "estimatedDirectPayoutTcc",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "estimatedReinvestmentTcc",
-                        "type": "uint256"
-                    },
-                    {
-                        "internalType": "uint256",
-                        "name": "daysIntoCycle",
-                        "type": "uint256"
-                    }
-                ],
-                "internalType": "struct TCCInvestmentReward.DailyRoiSummary[]",
+                "internalType": "bool",
                 "name": "",
-                "type": "tuple[]"
+                "type": "bool"
             }
         ],
         "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_amountTcc",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "_sponsor",
-                "type": "address"
-            }
-        ],
-        "name": "invest",
-        "outputs": [],
-        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -1151,16 +1494,34 @@
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "pancakeSwapRouter",
-        "outputs": [
+        "inputs": [
             {
-                "internalType": "contract IPancakeSwapRouter",
-                "name": "",
+                "internalType": "uint256",
+                "name": "_amountTcc",
+                "type": "uint256"
+            }
+        ],
+        "name": "reInvest",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_amountTcc",
+                "type": "uint256"
+            },
+            {
+                "internalType": "address",
+                "name": "_sponsor",
                 "type": "address"
             }
         ],
-        "stateMutability": "view",
+        "name": "register",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
     },
     {
@@ -1190,81 +1551,16 @@
         "type": "function"
     },
     {
-        "inputs": [
+        "inputs": [],
+        "name": "tccPriceManager",
+        "outputs": [
             {
-                "internalType": "uint256",
-                "name": "_newPercentage",
-                "type": "uint256"
-            }
-        ],
-        "name": "setDailyRoiPercentage",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_developerWallet",
+                "internalType": "contract ITCCPriceManager",
+                "name": "",
                 "type": "address"
             }
         ],
-        "name": "setDeveloperWallet",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_pancakeSwapRouter",
-                "type": "address"
-            }
-        ],
-        "name": "setPancakeSwapRouter",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256[]",
-                "name": "_rewardTiers",
-                "type": "uint256[]"
-            }
-        ],
-        "name": "setRewardTiers",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_tccToken",
-                "type": "address"
-            }
-        ],
-        "name": "setTccToken",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_usdtToken",
-                "type": "address"
-            }
-        ],
-        "name": "setUsdtToken",
-        "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -1275,6 +1571,149 @@
                 "internalType": "contract IERC20WithDecimals",
                 "name": "",
                 "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalAccumulatedDeveloperFundTCC",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalAccumulatedDeveloperFundUSD",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalDistributedLevelIncome",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalDistributedROI",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalInvestments",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalPriceUpdateCount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalRewardsAcheiverStage1",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalRewardsAcheiverStage2",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalRewardsAcheiverStage3",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalTccInvested",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "totalUsers",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -1314,26 +1753,30 @@
                 "type": "address"
             }
         ],
+        "name": "userMap",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
         "name": "users",
         "outputs": [
             {
                 "internalType": "uint256",
-                "name": "lastInvestmentTimestamp",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalTccInvested",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "lastClaimDay",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "totalRoiDaysClaimed",
+                "name": "userID",
                 "type": "uint256"
             },
             {
@@ -1343,27 +1786,17 @@
             },
             {
                 "internalType": "uint256",
-                "name": "currentPrincipalUsd",
+                "name": "totalInvestments",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
-                "name": "lastReinvestmentDay",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "accumulatedLevelRoiUsd",
+                "name": "totalTccInvested",
                 "type": "uint256"
             },
             {
                 "internalType": "uint256",
                 "name": "lastLevelCapResetDay",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "currentDailyLevelRoiEarnedUsd",
                 "type": "uint256"
             }
         ],

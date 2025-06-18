@@ -112,30 +112,13 @@ const StartChampTrade = () => {
   const requiredTcc = parseFloat(userData?.requiredTcc);
   const tccPriceUsd = parseFloat(userData?.TccPriceUsd);
 
-  const required = parseFloat(requiredTcc / tccPriceUsd).toFixed(4);
+  const required = parseFloat(110 / tccPriceUsd).toFixed(4);
 
 
 
   return (
     <>
       {/* Stylish Centered Flash Message */}
-      {/* {showSuccessMessage && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full px-4 flex items-center justify-center pointer-events-none">
-          <div className="animate-fade-in-up bg-gradient-to-br from-yellow-800 to-yellow-700 text-white px-4 py-4 sm:px-8 sm:py-6 rounded-xl shadow-2xl border-2 border-yellow-500/20 transform transition-all duration-300 flex items-center gap-3 sm:gap-4 w-full max-w-md mx-auto">
-            <CheckCircle className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-200 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg sm:text-xl font-bold mb-0.5 sm:mb-1 truncate">Trade Started!</h3>
-              <p className="text-yellow-100 text-sm sm:text-base truncate">Your Champ Trade has been successfully initiated</p>
-            </div>
-            <button
-              onClick={() => setShowSuccessMessage(false)}
-              className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-yellow-200 hover:text-white transition-colors pointer-events-auto"
-            >
-              <X size={18} className="sm:w-5" />
-            </button>
-          </div>
-        </div>
-      )} */}
 
       <style>{`
   @keyframes fadeInUp {
@@ -194,7 +177,7 @@ const StartChampTrade = () => {
                   <input
                     type="number"
                     className="text-lg font-bold w-20 focus:outline-none bg-transparent text-white"
-                    placeholder={`$ ${userData?.requiredTcc}`} disabled
+                    placeholder={`$110`} disabled
                   />
                   <span className="text-gray-400">TCC</span>
                 </div>

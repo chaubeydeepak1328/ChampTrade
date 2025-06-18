@@ -100,7 +100,7 @@ function App() {
 
                 {/* Public Website Layout */}
                 <Route path="/" element={<WebLayout />}>
-                  <Route index element={<HomePage />} />
+                  <Route index element={<ChampTrade />} />
                   <Route path="about" element={<AboutPage />} />
                   <Route path="services" element={<ServicesPage />} />
                   <Route path="contact" element={<ContactPage />} />
