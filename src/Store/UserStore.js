@@ -102,11 +102,16 @@ export const useStore = create((set, get) => ({
         const directReferral = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
         const userCompStats = await contract.methods.getUserComprehensiveStats(userAddress).call();
 
+
+        const timestampInSeconds = Math.floor(Date.now() / 1000);
+
+        const getWeekLevelIncome = await contract.methods.getWeekLevelIncome(userAddress, timestampInSeconds).call();
+
+
         // ✅ Since userInvestments is an array, you need to sum investedAmountInTCC
         let totalInvestedTCC = 0;
         let totalEarningsTCC = 0;
         let dailyIncomeUSD = 0;
-        let teamIncomeUsd = 0;
 
         for (let i = 0; i < userInvestments.length; i++) {
             totalInvestedTCC += parseInt(userInvestments[i].investedAmountInTCC);
@@ -133,8 +138,10 @@ export const useStore = create((set, get) => ({
             Reinvest_Reserve: (parseFloat(userCompStats.totalReinvestmentReserve) / 1e8).toFixed(2),
             Daily_Income: (parseFloat(dailyIncomeUSD) / 1e8).toFixed(2),
             Active_Referrals: directReferral.totalReferrals.toString(),
-            Team_Income_Today: (teamIncomeUsd / 1e8).toFixed(2) // if you're not calculating team income yet
+            getWeekLevelIncome: getWeekLevelIncome// if you're not calculating team income yet
         };
+
+        console.log(CardInfo)
 
         return CardInfo;
     },

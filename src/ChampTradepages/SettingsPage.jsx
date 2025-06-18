@@ -6,16 +6,17 @@ import { useAppKitAccount } from '@reown/appkit/react';
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-
   const [profileData, setProfileData] = useState();
   const { address, isConnected } = useAppKitAccount();
 
-  // const referralLink = profileData?.userId
-  //   ? `${window.location.origin}/referral?ref=TCC${profileData.userId}`
-  //   : '';
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
 
+  const Profile = useStore((state) => state.Profile);
 
-
+  const referralLink = userAddress
+    ? `${window.location.origin}/referral?ref=TCC${userAddress}`
+    : '';
 
   const handleCopyLink = async () => {
     if (!referralLink) return;
@@ -45,51 +46,46 @@ const ProfilePage = () => {
     }
   };
 
-  // ================================================
-  // Profile Page 
-  // ================================================
-
-  const userData = JSON.parse(localStorage.getItem("userData") || "null");
-  const userAddress = userData?.userAddress || null;
-
-  const Profile = useStore((state) => state.Profile)
-
-  const referralLink = userAddress
-    ? `${window.location.origin}/referral?ref=TCC${userAddress}`
-    : '';
-
   useEffect(() => {
     const fetchProfileData = async () => {
-      const res = await Profile(userAddress)
-
-      setProfileData(res)
-    }
-    fetchProfileData()
-  }, [])
-
-
-
-
+      if (!userAddress) return;
+      const res = await Profile(userAddress);
+      setProfileData(res);
+    };
+    fetchProfileData();
+  }, [userAddress, Profile]);
 
   return (
     <div className="bg-[#111] text-white p-6 rounded-lg max-w-4xl mx-auto border border-yellow-500 ">
       <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
-        {/* Left Column */}
         <div className="space-y-6">
-          {/* Basic Profile Section */}
           <div className="bg-[#1a1a1a] p-4 rounded-lg">
             <h2 className="text-lg font-semibold mb-4 border-b border-yellow-500 pb-2">Basic Profile</h2>
             <div className="space-y-3">
-              <ProfileItem label="Connected Address" value={userAddress.slice(0, 6) + "...." + userAddress.slice(0, 6)} />
-              <ProfileItem label="Connected Status" value={isConnected ? "Online" : "Offline"} />
-              <ProfileItem label="Sponsor" value={profileData?.directSponsor.slice(0, 6) + "...." + profileData?.directSponsor.slice(0, 6)} />
-              {/* <ProfileItem label="User Id" value="1" /> */}
-              {/* <ProfileItem label="Sponsor Id" value="Loading..." /> */}
+              <ProfileItem
+                label="Connected Address"
+                value={
+                  userAddress
+                    ? `${userAddress.slice(0, 6)}....${userAddress.slice(-4)}`
+                    : 'Not connected'
+                }
+              />
+              <ProfileItem
+                label="Connected Status"
+                value={isConnected ? "Online" : "Offline"}
+              />
+              <ProfileItem
+                label="Sponsor"
+                value={
+                  profileData?.directSponsor
+                    ? `${profileData.directSponsor.slice(0, 6)}....${profileData.directSponsor.slice(-4)}`
+                    : 'Loading...'
+                }
+              />
             </div>
           </div>
-
         </div>
       </div>
 
@@ -118,7 +114,6 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };

@@ -260,7 +260,7 @@ const PlanProgress = () => {
                     }} className={`w-full md:w-[200px] ${selectedInvestment.canClaimNow && selectedInvestment.daysClaimed == 0 ? 'bg-yellow-600 hover:bg-yellow-500' : ''} text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500 `}>
                     {selectedInvestment.canClaimNow && selectedInvestment.daysClaimed == 0 ? "Claim"
                       : selectedInvestment.daysClaimed !== 0 ? "Withdrawn"
-                        : `Claim in ${(calculateRemainingDays(selectedInvestment.currentDayOfWeek))} Days (${selectedInvestment.timeUntilClaim})`}
+                        : `Claim in (${selectedInvestment.timeUntilClaim})`}
 
                   </button>
                 </div>
@@ -348,6 +348,7 @@ const PlanProgress = () => {
           </div>
         </div>
       </div>
+
     </>
   );
 };

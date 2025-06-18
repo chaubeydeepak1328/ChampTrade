@@ -78,9 +78,9 @@ function MyOverviewWidgets() {
     },
     {
       icon: TrendingUp,
-      label: 'Team Income Today',
-      value: '$' + (cardInfo?.Team_Income_Today ?? 0),
-      subtext: 'of $1,800 cap'
+      label: 'Weekly Income',
+      value: (cardInfo?.getWeekLevelIncome[1] ?? 0) + '  TCC',
+      subtext: '$' + (cardInfo?.getWeekLevelIncome[2] ?? 0)
     }
   ];
 
