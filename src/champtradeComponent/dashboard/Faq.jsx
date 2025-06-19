@@ -3,25 +3,26 @@ import { HelpCircle } from 'lucide-react';
 const faqs = [
   {
     question: 'What is TCC2.0?',
-    answer: 'An ERC20 token with utility across the Ramestta ecosystem.'
+    answer: 'TCC2.0 is a BEP-20 utility token powering the Champ Trade platform. It is used for purchasing investment packages, earning daily ROI, referral rewards, and participating in ecosystem utilities like staking, trading, and trip rewards.'
   },
   {
     question: 'How do I buy tokens?',
-    answer: 'Connect your wallet → enter TCC → buy tokens → done.'
+    answer: 'Connect your BSC wallet (e.g., MetaMask), go to the "Buy TCC 2.0" section, enter the amount, and confirm the transaction. Tokens are purchased using BNB via PancakeSwap.'
   },
   {
     question: 'Is my referral permanent?',
-    answer: 'Yes, it\'s recorded on-chain. You get credit for all valid purchases.'
+    answer: 'Yes, your referral is recorded permanently on-chain. All valid referrals you generate will continuously earn you daily income up to 6 levels deep.'
   },
   {
-    question: 'When does presale end?',
-    answer: 'Either after 10M tokens sold or manually ended by the owner.'
+    question: 'When does the presale end?',
+    answer: 'There was no presale or private sale for TCC2.0. The token was directly launched through the ChampStake staking system and the ChampTrade investment platform.'
   },
   {
-    question: 'Can I withdraw TCC?',
-    answer: 'No, once you buy tokens, TCC is locked into the system. Owner can only withdraw for project use.'
-  }
+    question: 'Can I withdraw my TCC tokens?',
+    answer: 'TCC tokens purchased for Champ Trade are locked into the system and used for earning daily ROI. However, users can claim their accumulated rewards every Sunday, which will be credited directly to their wallet.'
+  },
 ];
+
 
 export default function Faq() {
   return (

@@ -61,7 +61,7 @@ const TeamOverview = () => {
           </div>
         </div>
 
-        <div className="bg-[rgb(20,20,20)] p-4 rounded-xl border-2 border-red-500/20 hover:shadow-[0_0_10px_rgb(248,113,113,0.1)] transition-all">
+        {/* <div className="bg-[rgb(20,20,20)] p-4 rounded-xl border-2 border-red-500/20 hover:shadow-[0_0_10px_rgb(248,113,113,0.1)] transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-neutral-300 text-sm">Inactive Members</p>
@@ -71,9 +71,9 @@ const TeamOverview = () => {
               <UserX className="w-5 h-5 text-red-400" />
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <div className="bg-[rgb(20,20,20)] p-4 rounded-xl border-2 border-yellow-500/20 hover:shadow-[0_0_10px_rgb(250,204,21,0.1)] transition-all">
+        {/* <div className="bg-[rgb(20,20,20)] p-4 rounded-xl border-2 border-yellow-500/20 hover:shadow-[0_0_10px_rgb(250,204,21,0.1)] transition-all">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-neutral-300 text-sm">Daily Team Earnings</p>
@@ -83,7 +83,7 @@ const TeamOverview = () => {
               <TrendingUp className="w-5 h-5 text-yellow-500" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Growth Metrics */}

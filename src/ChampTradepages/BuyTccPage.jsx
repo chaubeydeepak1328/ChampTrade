@@ -4,7 +4,7 @@ import Panel from '../champtradeComponent/dashboard/Panel';
 
 function BuyTccPage() {
   return (
-    <Panel title="Buy TCC">
+    <Panel title="Buy TCC2.0">
       <BuyTccPanel />
     </Panel>
   );

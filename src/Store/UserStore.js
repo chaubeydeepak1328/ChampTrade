@@ -718,7 +718,27 @@ export const useStore = create((set, get) => ({
                 ) {
                     Swal.fire("Notice", "You have no ROI rewards to claim at this time.", "info");
                 } else {
-                    Swal.fire("Error", "Gas estimation failed. Please try again.", "error");
+                    Swal.fire({
+                        title: 'Claim Restricted!',
+                        html: `
+                          <div style="display: flex; flex-direction: column; align-items: center; color: #facc15;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle">
+                              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                              <line x1="12" x2="12" y1="9" y2="13" />
+                              <line x1="12" x2="12.01" y1="17" y2="17" />
+                            </svg>
+                            <p style="margin-top: 12px;">Claim is only available on <b>Sunday</b>.</p>
+                          </div>
+                        `,
+                        background: '#1a1a1a',
+                        confirmButtonText: 'Got it',
+                        confirmButtonColor: '#facc15',
+                        customClass: {
+                            title: 'text-yellow-400',
+                            popup: 'rounded-xl border border-yellow-500 shadow-lg',
+                        }
+                    });
+
                 }
                 console.error("❌ Gas estimation failed:", error);
                 return null;

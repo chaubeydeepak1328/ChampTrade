@@ -3,7 +3,7 @@ import Panel from '../champtradeComponent/dashboard/Panel';
 
 function ReinvestmentCyclesPage() {
   return (
-    <Panel title="Create Portfolio" >
+    <Panel title="Portfolio Status" >
       <PlanProgress />
     </Panel>
   );

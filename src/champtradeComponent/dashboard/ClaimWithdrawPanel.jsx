@@ -3,11 +3,14 @@ import { Wallet, Clock, AlertCircle } from 'lucide-react';
 import { useStore } from '../../Store/UserStore';
 import { useTransaction } from '../../config/register';
 import Swal from 'sweetalert2';
+import { useAppKitAccount } from '@reown/appkit/react';
 
 const ClaimWithdrawPanel = () => {
 
   const userData = JSON.parse(localStorage.getItem("userData") || "null");
   const userAddress = userData?.userAddress || null;
+
+  const { address, isConnected } = useAppKitAccount();
 
   const getWihDrawDetails = useStore((state) => state.getWihDrawDetails)
   const [withdrawData, setWithDrawData] = useState();
@@ -51,11 +54,23 @@ const ClaimWithdrawPanel = () => {
   }, [hash]);
 
 
+
+  const isSunday = new Date().getDay() === 0;
+
+  console.log(isSunday)
+
+
+
   const widthdrawAll = async () => {
+    // if (address && isConnected) {
     const response = ClaimAllReward(userAddress);
     if (response) {
-      await handleSendTx(response?.trxData);
+      await handleSendTx(response);
     }
+    //   } else {
+    //     Swal.fire("Warning", "Connect your wallet first", "warning");
+    // }
+
   }
 
 
@@ -101,8 +116,9 @@ const ClaimWithdrawPanel = () => {
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <button onClick={() => widthdrawAll()} className="w-full bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors border border-yellow-500">
-          Claim All Rewards
+        <button disabled={isSunday}
+          onClick={() => widthdrawAll()} className={`w-full ${isSunday ? "bg-yellow-600 hover:bg-yellow-500" : ""}  text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500`}>
+          {isSunday ? "Claim on Sunday" : "Claim All Rewards"}
         </button>
         {/* <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
           Withdraw to Wallet
@@ -113,7 +129,7 @@ const ClaimWithdrawPanel = () => {
       <div className="flex items-start gap-3 p-4 bg-yellow-900/30 rounded-lg border border-yellow-500/30">
         <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-yellow-400">
-          Withdrawals are processed within Same time. Minimum withdrawal amount is 1 TCC.
+          Withdrawals only Available on Sunday
         </p>
       </div>
     </div>

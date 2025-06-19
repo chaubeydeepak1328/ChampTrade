@@ -40,6 +40,7 @@ const Reward = () => {
     <div className="space-y-6">
       {/* Team Statistics */}
       <div className="bg-[rgb(20,20,20)] p-4 sm:p-6 rounded-xl border-2 border-yellow-500/20">
+        <div className='w-full'> <h2 className="text-white text-xl typing m-auto">Achievemnet Reward Live Now</h2></div>
         <h3 className="text-lg font-semibold text-white mb-4">
           <span className="bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">
             Achievement Status
@@ -50,35 +51,34 @@ const Reward = () => {
           <div className="flex items-center justify-between py-3 border-b border-yellow-500/10 hover:bg-[rgb(30,30,30)] px-2 rounded transition-colors">
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-medium text-white">Reward 1</p>
+                <p className="font-medium text-white">Tahiland Trip</p>
               </div>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">Pending</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">Record Comming Soon</span>
           </div>
 
           {/* Ongoing Activity */}
           <div className="flex items-center justify-between py-3 border-b border-yellow-500/10 hover:bg-[rgb(30,30,30)] px-2 rounded transition-colors">
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-medium text-white">Reward 2</p>
+                <p className="font-medium text-white">Goa Trip</p>
               </div>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Ongoing</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Record Comming Soon</span>
           </div>
 
           {/* Completed Activity */}
           <div className="flex items-center justify-between py-3 hover:bg-[rgb(30,30,30)] px-2 rounded transition-colors">
             <div>
-              <p className="font-medium text-white">Reward 3</p>
+              <p className="font-medium text-white">manali Trip</p>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Completed</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Record Comming Soon</span>
           </div>
         </div>
       </div>
 
       {/* Dropdown Options Below Activity Card */}
-      <div className="space-y-4 w-full">
-        {/* Full Width Dropdown Filter */}
+      {/* <div className="space-y-4 w-full">
         <div className="relative w-full">
           <button
             onClick={() => setShowDropdown(!showDropdown)}
@@ -115,9 +115,8 @@ const Reward = () => {
           )}
         </div>
 
-        {/* Two Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-          {/* Total Members Card */}
+
           <div className="bg-[rgb(20,20,20)] p-4 rounded-xl border-2 border-yellow-500/20 hover:shadow-[0_0_10px_rgb(250,204,21,0.1)] transition-all h-full">
             <div className="flex items-start justify-between h-full">
               <div className="flex flex-col gap-2">
@@ -142,7 +141,7 @@ const Reward = () => {
             </div>
           </div>
 
-          {/* Active Members Card */}
+
           <div className="bg-[rgb(20,20,20)] p-4 rounded-xl border-2 border-green-500/20 hover:shadow-[0_0_10px_rgb(74,222,128,0.1)] transition-all h-full">
             <div className="flex items-start justify-between h-full">
               <div className="flex-1 min-w-0">
@@ -184,9 +183,12 @@ const Reward = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
+
+
+
 
 export default Reward;

@@ -109,17 +109,17 @@ const PlanProgress = () => {
         // parse each investment tuple
         const parsed = response.map((inv) => ({
           investmentID: Number(inv.investmentID),
-          tccPriceDuringInvestment: Number(inv.tccPriceDuringInvestment),
-          investedAmountInUSD: Number(inv.investedAmountInUSD),
-          investedAmountInTCC: Number(inv.investedAmountInTCC),
-          developerFeeTCC: Number(inv.developerFeeTCC),
-          principalInUSD: Number(inv.principalInUSD),
-          principalInTCC: Number(inv.principalInTCC),
-          totalROIReceived: Number(inv.totalROIReceived),
-          totalAccumulatedAmountForInvestment: Number(inv.totalAccumulatedAmountForInvestment),
+          tccPriceDuringInvestment: Number(inv.tccPriceDuringInvestment) / 1e8,
+          investedAmountInUSD: Number(inv.investedAmountInUSD) / 1e8,
+          investedAmountInTCC: Number(inv.investedAmountInTCC) / 1e8,
+          developerFeeTCC: Number(inv.developerFeeTCC) / 1e18,
+          principalInUSD: Number(inv.principalInUSD) / 1e8,
+          // principalInTCC: Number(inv.principalInTCC) / 1e18,
+          totalROIReceived: Number(inv.totalROIReceived) / 1e8,
+          totalAccumulatedAmountForInvestment: Number(inv.totalAccumulatedAmountForInvestment) / 1e8,
           startDay: Number(inv.startDay),
           roiDaysClaimed: Number(inv.roiDaysClaimed),
-          lastInvestmentTimestamp: Number(inv.lastInvestmentTimestamp),
+          lastInvestmentTimestamp: new Date(Number(inv.lastInvestmentTimestamp) * 1000).toLocaleString(),
           lastReinvestmentDay: Number(inv.lastReinvestmentDay),
           lastClaimDay: Number(inv.lastClaimDay),
           lastLevelCapResetDay: Number(inv.lastLevelCapResetDay),
@@ -127,15 +127,15 @@ const PlanProgress = () => {
           claimCount: Number(inv.claimCount),
           claimedROIs: inv.claimedROIs.map((roi) => ({
             day: Number(roi.day),
-            amountUsd: Number(roi.amountUsd),
-            amountTcc: Number(roi.amountTcc),
-            claimedAt: Number(roi.claimedAt),
+            amountUsd: Number(roi.amountUsd) / 1e8,
+            amountTcc: Number(roi.amountTcc) / 1e18,
+            claimedAt: new Date(Number(roi.claimedAt) * 1000).toLocaleString(),
           })),
           remainingDays: Number(inv.remainingDays),
-          dailyROIUsd: Number(inv.dailyROIUsd),
-          dailyROITcc: Number(inv.dailyROITcc),
-          totalExpectedROIUsd: Number(inv.totalExpectedROIUsd),
-          totalExpectedROITcc: Number(inv.totalExpectedROITcc),
+          dailyROIUsd: Number(inv.dailyROIUsd) / 1e8,
+          dailyROITcc: Number(inv.dailyROITcc) / 1e18,
+          totalExpectedROIUsd: Number(inv.totalExpectedROIUsd) / 1e8,
+          totalExpectedROITcc: Number(inv.totalExpectedROITcc) / 1e18,
         }));
 
         console.log("Parsed InvestmentView:", parsed);
@@ -203,7 +203,7 @@ const PlanProgress = () => {
         <div className="flex justify-between items-start mb-2 sm:mb-4 relative">
           <h3 className="text-base sm:text-xl font-bold text-white flex items-center gap-1 sm:gap-2">
             <RefreshCw className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-500" />
-            <span className="text-sm sm:text-base">portfolio Progress</span>
+            <span className="text-sm sm:text-base">Portfolio Progress</span>
           </h3>
 
           <div className="relative">
@@ -228,10 +228,10 @@ const PlanProgress = () => {
                 }}
                 className="w-full bg-[rgb(30,30,30)] border border-yellow-500/20 rounded-lg text-white p-2 text-sm"
               >
-                <option value="" disabled>Select Investment</option>
+                <option value="" disabled>Select Portfolio</option>
                 {investments?.map((inv, idx) => (
                   <option key={idx} value={inv.investmentId}>
-                    Investment {inv.investmentId}
+                    Portfolio {inv.investmentId}
                   </option>
                 ))}
               </select>
@@ -330,12 +330,12 @@ const PlanProgress = () => {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">TCC Price</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">TCC Price Durind Investment</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (USD)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (TCC)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Developer Fee</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (USD)</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (TCC)</th>
+                  {/* <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (TCC)</th> */}
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">ROI Received</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Days Claimed</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Remaining Days</th>
@@ -351,19 +351,19 @@ const PlanProgress = () => {
                   <tr key={inv.investmentID || index} className="hover:bg-yellow-500/5">
                     <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
                     <td className="px-4 py-3 text-sm text-white">{inv.investmentID}</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment / 1e18).toFixed(4)}</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD / 1e18).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.investedAmountInTCC / 1e18).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.developerFeeTCC / 1e18).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.principalInUSD / 1e18).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC / 1e18).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.totalROIReceived / 1e18).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment).toFixed(4)}</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.investedAmountInTCC).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.developerFeeTCC).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.principalInUSD).toFixed(2)}</td>
+                    {/* <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</td> */}
+                    <td className="px-4 py-3 text-sm text-white">${(inv.totalROIReceived).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm text-white">{inv.roiDaysClaimed}</td>
                     <td className="px-4 py-3 text-sm text-white">{inv.remainingDays}</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.dailyROIUsd / 1e18).toFixed(4)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.dailyROITcc / 1e18).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.totalExpectedROIUsd / 1e18).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.totalExpectedROITcc / 1e18).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.dailyROIUsd).toFixed(4)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.dailyROITcc).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">${(inv.totalExpectedROIUsd).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-sm text-white">{(inv.totalExpectedROITcc).toFixed(4)} TCC</td>
                     <td className="px-4 py-3 text-sm">
                       <span className={`px-2 py-1 text-xs rounded-full ${inv.isCompleted ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-500'}`}>
                         {inv.isCompleted ? 'Completed' : 'Active'}
@@ -391,35 +391,35 @@ const PlanProgress = () => {
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">TCC Price (at time)</p>
-                    <p className="text-sm text-white">${(inv.tccPriceDuringInvestment / 1e18).toFixed(4)}</p>
+                    <p className="text-sm text-white">${(inv.tccPriceDuringInvestment).toFixed(4)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Invested USD</p>
-                    <p className="text-sm text-white">${(inv.investedAmountInUSD / 1e18).toFixed(2)}</p>
+                    <p className="text-sm text-white">${(inv.investedAmountInUSD).toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Invested TCC</p>
-                    <p className="text-sm text-white">{(inv.investedAmountInTCC / 1e18).toFixed(4)} TCC</p>
+                    <p className="text-sm text-white">{(inv.investedAmountInTCC).toFixed(4)} TCC</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Developer Fee (TCC)</p>
-                    <p className="text-sm text-white">{(inv.developerFeeTCC / 1e18).toFixed(4)} TCC</p>
+                    <p className="text-sm text-white">{(inv.developerFeeTCC).toFixed(4)} TCC</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Principal USD</p>
-                    <p className="text-sm text-white">${(inv.principalInUSD / 1e18).toFixed(2)}</p>
+                    <p className="text-sm text-white">${(inv.principalInUSD).toFixed(2)}</p>
                   </div>
-                  <div>
+                  {/* <div>
                     <p className="text-xs text-yellow-500">Principal TCC</p>
-                    <p className="text-sm text-white">{(inv.principalInTCC / 1e18).toFixed(4)} TCC</p>
-                  </div>
+                    <p className="text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</p>
+                  </div> */}
                   <div>
                     <p className="text-xs text-yellow-500">ROI Received</p>
-                    <p className="text-sm text-white">${(inv.totalROIReceived / 1e18).toFixed(2)}</p>
+                    <p className="text-sm text-white">${(inv.totalROIReceived).toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Accumulated Total</p>
-                    <p className="text-sm text-white">${(inv.totalAccumulatedAmountForInvestment / 1e18).toFixed(2)}</p>
+                    <p className="text-sm text-white">${(inv.totalAccumulatedAmountForInvestment).toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Start Day</p>
@@ -459,19 +459,19 @@ const PlanProgress = () => {
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Daily ROI (USD)</p>
-                    <p className="text-sm text-white">${(inv.dailyROIUsd / 1e18).toFixed(4)}</p>
+                    <p className="text-sm text-white">${(inv.dailyROIUsd).toFixed(4)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Daily ROI (TCC)</p>
-                    <p className="text-sm text-white">{(inv.dailyROITcc / 1e18).toFixed(4)} TCC</p>
+                    <p className="text-sm text-white">{(inv.dailyROITcc).toFixed(4)} TCC</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Total Expected ROI (USD)</p>
-                    <p className="text-sm text-white">${(inv.totalExpectedROIUsd / 1e18).toFixed(2)}</p>
+                    <p className="text-sm text-white">${(inv.totalExpectedROIUsd).toFixed(2)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Total Expected ROI (TCC)</p>
-                    <p className="text-sm text-white">{(inv.totalExpectedROITcc / 1e18).toFixed(4)} TCC</p>
+                    <p className="text-sm text-white">{(inv.totalExpectedROITcc).toFixed(4)} TCC</p>
                   </div>
                 </div>
 

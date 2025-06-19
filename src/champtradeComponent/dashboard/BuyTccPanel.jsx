@@ -1,7 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Coins, TrendingUp, ExternalLink } from 'lucide-react';
+import { useStore } from '../../Store/UserStore';
 
 const BuyTccPanel = () => {
+
+  const userData = JSON.parse(localStorage.getItem("userData") || "null");
+  const userAddress = userData?.userAddress || null;
+
+  const getUserAllowance = useStore((state) => state.getUserAllowance);
+
+  const [userinfo, setUserInfo] = useState();
+
+
+
+  useEffect(() => {
+    const fetchUserAllowance = async () => {
+      const res = await getUserAllowance(userAddress)
+      setUserInfo(res)
+
+    }
+    if (userAddress)
+      fetchUserAllowance()
+  }, [])
   return (
     <div className="space-y-6 bg-[rgb(20,20,20)] rounded-xl p-6 shadow-lg border border-yellow-500/20">
       {/* Current Price */}
@@ -10,11 +30,11 @@ const BuyTccPanel = () => {
           <Coins className="h-6 w-6 text-yellow-500" />
           <h3 className="text-lg font-semibold text-white">Current Price</h3>
         </div>
-        <div className="text-3xl font-bold text-yellow-500 mb-2">$0.01</div>
-        <div className="flex items-center gap-2 text-green-400">
+        <div className="text-3xl font-bold text-yellow-500 mb-2">${userinfo?.TccPriceUsd}</div>
+        {/* <div className="flex items-center gap-2 text-green-400">
           <TrendingUp className="h-4 w-4" />
           <span>+5.2% (24h)</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Quick Buy */}
@@ -26,6 +46,7 @@ const BuyTccPanel = () => {
               <p className="text-sm text-gray-400 mb-1">You Pay</p>
               <div className="flex items-center justify-between">
                 <input
+                  disabled={true}
                   type="number"
                   className="text-lg font-bold w-full focus:outline-none bg-transparent text-white"
                   placeholder="0.00"
@@ -37,6 +58,7 @@ const BuyTccPanel = () => {
               <p className="text-sm text-gray-400 mb-1">You Receive</p>
               <div className="flex items-center justify-between">
                 <input
+                  disabled={true}
                   type="number"
                   className="text-lg font-bold w-full focus:outline-none bg-transparent text-white"
                   placeholder="0.00"
@@ -47,7 +69,7 @@ const BuyTccPanel = () => {
           </div>
           <div className="flex justify-center">
             <button className="w-md bg-yellow-500/50  border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
-              swap now
+              Comming Soon
             </button>
           </div>
         </div>

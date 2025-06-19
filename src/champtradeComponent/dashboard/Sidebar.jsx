@@ -3,7 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, DollarSign, Users, GitFork,
   RefreshCw, Wallet as WalletIcon, Coins,
-  HelpCircle, Settings, Menu, X, Trophy, Clock, LogIn, LogOut
+  HelpCircle, Settings, Menu, X, Trophy, Clock, LogIn, LogOut,
+  Wallet,
+  Copy
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAppKitAccount, useDisconnect } from '@reown/appkit/react';
@@ -64,6 +66,14 @@ function Sidebar() {
     }
   ];
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(userAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
 
   // ==============================================
   // Handle Disconnect
@@ -76,6 +86,7 @@ function Sidebar() {
   const navigate = useNavigate();
 
   const [userDisconnect, setUserDisconnected] = useState(false);
+
 
 
   useEffect(() => {
@@ -123,24 +134,18 @@ function Sidebar() {
               </div>
 
               <div className="space-y-4">
-                {/* <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-golden" />
-                  <span className="text-sm text-golden-white">Cycle: 1 (163 days left)</span>
-                </div> */}
-
                 {userAddress && (
                   <div className="flex items-center gap-2">
-                    <WalletIcon className="h-5 w-5 text-golden" />
-                    <span className="text-sm text-golden-white"> {userAddress.slice(0, 5)}... {userAddress.slice(-4)}</span>
+                    <Wallet className="h-5 w-5 text-golden" />
+                    <span className="text-sm text-golden-white">
+                      {userAddress.slice(0, 5)}...{userAddress.slice(-4)}
+                    </span>
+                    <button onClick={handleCopy} className="text-golden hover:text-white transition">
+                      <Copy className="h-4 w-4" />
+                    </button>
+                    {copied && <span className="text-xs text-green-400">Copied!</span>}
                   </div>
                 )}
-
-                {/* <button
-                  onClick={handleConnectWallet}
-                  className="w-full bg-golden text-dark-green px-4 py-2 rounded-lg hover:bg-golden-dark transition-colors"
-                >
-                  {walletConnected ? 'Disconnect Wallet' : 'Connect Wallet'}
-                </button> */}
               </div>
             </div>
           )}
