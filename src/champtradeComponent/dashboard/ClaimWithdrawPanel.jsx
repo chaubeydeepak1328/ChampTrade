@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Wallet, Clock, AlertCircle } from 'lucide-react';
 import { useStore } from '../../Store/UserStore';
+import { useTransaction } from '../../config/register';
+import Swal from 'sweetalert2';
 
 const ClaimWithdrawPanel = () => {
 
@@ -23,6 +25,38 @@ const ClaimWithdrawPanel = () => {
 
 
   const tccPriceUsd = parseFloat(withdrawData?.userBalance) * parseFloat(withdrawData?.TccPriceUsd)
+
+
+
+  // ===========================================================
+  // widthdrawAll
+  // ===========================================================
+  const ClaimAllReward = useStore((state) => state.ClaimAllReward)
+
+  const { handleSendTx, hash } = useTransaction()
+
+
+  useEffect(() => {
+    if (hash) {
+
+      Swal.fire({
+        title: 'Claim SuccessFull',
+        html: `<a href="https://testnet.bscscan.com/tx/${hash}" target="_blank" style="color:#3085d6;">View on BscScan</a>`,
+        icon: 'success',
+        confirmButtonText: 'Close'
+      });
+
+      setLoading(false)
+    }
+  }, [hash]);
+
+
+  const widthdrawAll = async () => {
+    const response = ClaimAllReward(userAddress);
+    if (response) {
+      await handleSendTx(response?.trxData);
+    }
+  }
 
 
   return (
@@ -67,7 +101,7 @@ const ClaimWithdrawPanel = () => {
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <button className="w-full bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors border border-yellow-500">
+        <button onClick={() => widthdrawAll()} className="w-full bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-yellow-500 transition-colors border border-yellow-500">
           Claim All Rewards
         </button>
         {/* <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">

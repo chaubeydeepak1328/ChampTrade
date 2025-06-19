@@ -107,59 +107,62 @@ export const useStore = create((set, get) => ({
 
 
     dashboardCardInfo: async (userAddress) => {
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            console.log("🔗 TCC_STAKING Contract:", TCC_STAKING);
 
-        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-        console.log("==================> TCC_STAKING", TCC_STAKING)
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-        const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // Parallel fetching
+            const [userInvestments, userCompStats, levelWiseTeam] = await Promise.all([
+                contract.methods.getUserInvestmentsWithDetails(userAddress).call(),
+                contract.methods.getUserComprehensiveStats(userAddress).call(),
+                contract.methods.getLevelWiseTeam(userAddress).call()
+            ]);
 
-        // ✅ Await all calls properly
-        const userInvestments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
-        const directReferral = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
-        const userCompStats = await contract.methods.getUserComprehensiveStats(userAddress).call();
+            // Get current timestamp (today)
+            const timestampInSeconds = Math.floor(Date.now() / 1000);
 
+            console.log(timestampInSeconds)
 
-        const timestampInSeconds = Math.floor(Date.now() / 1000);
+            let getWeekLevelIncome = { totalRoiUsd: 0 };
+            try {
+                getWeekLevelIncome = await contract.methods
+                    .getWeekLevelIncome(userAddress, timestampInSeconds)
+                    .call();
+            } catch (err) {
+                console.warn("⚠️ getWeekLevelIncome call failed:", err.message);
+            }
 
-        const getWeekLevelIncome = await contract.methods.getWeekLevelIncome(userAddress, timestampInSeconds).call();
+            // Safely calculate totals using BigInt
+            let totalInvestedTCC = 0n;
+            let totalEarningsTCC = 0n;
+            let dailyIncomeUSD = 0n;
 
+            for (const inv of userInvestments) {
+                totalInvestedTCC += BigInt(inv.investedAmountInTCC || 0);
+                totalEarningsTCC += BigInt(inv.totalROIReceived || 0);
+                dailyIncomeUSD += BigInt(inv.dailyROIUsd || 0);
+            }
 
-        // ✅ Since userInvestments is an array, you need to sum investedAmountInTCC
-        let totalInvestedTCC = 0;
-        let totalEarningsTCC = 0;
-        let dailyIncomeUSD = 0;
+            const referralCount = levelWiseTeam.reduce((acc, levelArray) => acc + levelArray.length, 0);
 
-        for (let i = 0; i < userInvestments.length; i++) {
-            totalInvestedTCC += parseInt(userInvestments[i].investedAmountInTCC);
-            totalEarningsTCC += parseInt(userInvestments[i].totalROIReceived);
-            dailyIncomeUSD += parseInt(userInvestments[i].dailyROIUsd);
+            const CardInfo = {
+                My_PortFolio: (Number(totalInvestedTCC) / 1e8).toFixed(2),
+                Total_Earnings: (Number(totalEarningsTCC) / 1e18).toFixed(2),
+                Reinvest_Reserve: (Number(userCompStats.totalReinvestmentReserve || 0) / 1e8).toFixed(2),
+                Daily_Income: (Number(dailyIncomeUSD) / 1e8).toFixed(2),
+                Active_Referrals: referralCount,
+                getWeekLevelIncome: (Number(getWeekLevelIncome.totalRoiUsd || 0) / 1e8).toFixed(2)
+            };
+
+            console.log("📊 DashboardCardInfo:", CardInfo);
+            return CardInfo;
+
+        } catch (error) {
+            console.error("❌ Error in dashboardCardInfo:", error.message || error);
+            return null;
         }
-
-        // const currentDay = Math.floor(Date.now() / 1000 / 60);  // Since contract uses SECONDS_IN_DAY = 60
-        // const dayOfWeek = currentDay % 7;
-
-        // if (dayOfWeek !== 3) { // 3 is Sunday index
-        //     for (let i = 0; i < levelROIRecords.length; i++) {
-        //         const record = levelROIRecords[i];
-        //         if (!record.isCompleted) {
-        //             teamIncomeUsd += parseInt(record.roiAmount);
-        //         }
-        //     }
-        // }
-
-        // ✅ Finally create CardInfo correctly
-        const CardInfo = {
-            My_PortFolio: (parseFloat(totalInvestedTCC) / 1e8).toFixed(2),
-            Total_Earnings: (parseFloat(totalEarningsTCC) / 1e18).toFixed(2),
-            Reinvest_Reserve: (parseFloat(userCompStats.totalReinvestmentReserve) / 1e8).toFixed(2),
-            Daily_Income: (parseFloat(dailyIncomeUSD) / 1e8).toFixed(2),
-            Active_Referrals: directReferral.totalReferrals.toString(),
-            getWeekLevelIncome: getWeekLevelIncome// if you're not calculating team income yet
-        };
-
-        console.log(CardInfo)
-
-        return CardInfo;
     },
 
 
@@ -174,29 +177,18 @@ export const useStore = create((set, get) => ({
         let totalDirectEarningUsd = 0;
 
         for (let i = 0; i < userInvestments.length; i++) {
-            const roiReceived = parseInt(userInvestments[i].totalROIReceived);
+            const roiReceived = parseInt(userInvestments[i][7]);
             totalDirectEarningUsd += roiReceived;
         }
 
         // Convert from 1e8 to normal USD
         totalDirectEarningUsd = totalDirectEarningUsd / 1e8;
 
-        // 2️⃣ Get referral earnings
-        // const levelROIRecords = await contract.methods.levelROIReceived(userAddress).call();
-
         let totalReferralEarningUsd = 0;
-
-        // for (let i = 0; i < levelROIRecords.length; i++) {
-        //     const record = levelROIRecords[i];
-        //     const totalUsdReceived = parseInt(record.totalReceivedAmountInUSD);
-        //     totalReferralEarningUsd += totalUsdReceived;
-        // }
-
-        // totalReferralEarningUsd = totalReferralEarningUsd / 1e8;
 
         // 3️⃣ Return properly formatted object
         const earningsData = {
-            directIncome: parseFloat(totalDirectEarningUsd / 1e10).toFixed(5),
+            directIncome: parseFloat(totalDirectEarningUsd).toFixed(5),
             referralIncome: totalReferralEarningUsd.toFixed(2),
         }
 
@@ -450,65 +442,6 @@ export const useStore = create((set, get) => ({
         }
     },
 
-    ClaimReward: async (userAddress, sponsorAddress) => {
-        try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
-
-            // Fetch required investment amount
-            const amountInWei = await contract.methods.getRequiredTccForInvestment().call();
-
-            // Prepare transaction data for register
-            const trxData = await contract.methods.register(amountInWei, sponsorAddress).encodeABI();
-
-            // Get gas price
-            const gasPrice = await web3.eth.getGasPrice();
-
-            // Estimate gas
-            let gasLimit;
-            try {
-                gasLimit = await web3.eth.estimateGas({
-                    from: userAddress,
-                    to: TCC_STAKING.contractAddress, // ✅ Corrected here
-                    data: trxData,
-                    value: 0
-                });
-            } catch (error) {
-                console.error("❌ Gas estimation failed:", error);
-                alert("Gas estimation failed. Please check contract and inputs.");
-                return;
-            }
-
-            console.log("Estimated Gas:", gasLimit);
-            const gasCost = web3.utils.fromWei((BigInt(gasLimit) * BigInt(gasPrice)).toString(), "ether");
-            console.log("Estimated Gas Cost in ETH:", gasCost);
-
-            // Prepare transaction object
-            const tx = {
-                from: userAddress,
-                to: TCC_STAKING.contractAddress,  // ✅ Corrected here
-                data: trxData,
-                gas: gasLimit,
-                gasPrice: gasPrice,
-            };
-
-            return tx;
-
-        } catch (error) {
-            console.error("❌ RegisterUser error:", error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Register Error',
-                text: error.message,
-                confirmButtonText: 'OK'
-            });
-            throw error;
-        }
-    },
-
-
-
-
 
     Profile: async (userAddress) => {
         const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
@@ -524,57 +457,53 @@ export const useStore = create((set, get) => ({
 
 
     getTeamDashboardData: async (userAddress) => {
-
         try {
             const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
             const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-            // Get all referrals
-            const { referrals, totalReferrals } = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
+            // Get full team levels: [[level1Refs], [level2Refs], ...]
+            const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
 
+            // Flatten all referrals into one array
+            const allTeamMembers = levelWiseTeam.flat();
+
+            // Count active members
             let activeMembers = 0;
-
-            for (let i = 0; i < referrals.length; i++) {
-                const isActive = await contract.methods.isUserRegistered(referrals[i].addr).call();
-                if (isActive) {
-                    activeMembers++;
-                }
+            for (const ref of allTeamMembers) {
+                const isActive = await contract.methods.isUserRegistered(ref).call();
+                if (isActive) activeMembers++;
             }
 
-            const inactiveMembers = Number(totalReferrals) - Number(activeMembers);
+            const totalMembers = allTeamMembers.length;
+            const inactiveMembers = totalMembers - activeMembers;
 
-            // Calculate today's team earning
+            // Optional: Calculate team earnings for today (placeholder logic)
+            const currentDay = Math.floor(Date.now() / 86400); // 86400 = 24*60*60
+            const isSunday = currentDay % 7 === 3; // Based on your contract's SUNDAY_INDEX = 3
+
             let teamEarningTodayUsd = 0;
 
-            // const levelROIRecords = await contract.methods.getLevelROIReceivedSummary(userAddress).call();  // ← Note: you need to add this function as discussed earlier
-
-            // Get today's date (in your contract's SECONDS_IN_DAY scale)
-            // const currentDay = Math.floor(Date.now() / 1000 / 60);  // Because your contract: SECONDS_IN_DAY = 60
-            // const dayOfWeek = currentDay % 7;
-
-            // if (dayOfWeek !== 3) { // not Sunday
-            //     for (let i = 0; i < levelROIRecords.length; i++) {
-            //         const record = levelROIRecords[i];
-            //         if (!record.isCompleted) {
-            //             teamEarningTodayUsd += parseInt(record.roiAmount);
-            //         }
-            //     }
-            // }
+            if (!isSunday) {
+                // You could improve this by implementing a `getLevelROIReceivedSummary` or similar batched getter
+                // Placeholder: no real earnings fetched here
+                teamEarningTodayUsd = 0;
+            }
 
             const teamDashboard = {
-                totalMembers: Number(totalReferrals),
-                activeMembers: Number(activeMembers),
-                inactiveMembers: Number(inactiveMembers),
+                totalMembers,
+                activeMembers,
+                inactiveMembers,
                 dailyTeamEarnings: (teamEarningTodayUsd / 1e8).toFixed(2),
             };
 
-            console.log(teamDashboard)
-
+            console.log("📊 Team Dashboard:", teamDashboard);
             return teamDashboard;
         } catch (error) {
-            console.log(error)
+            console.error("❌ getTeamDashboardData error:", error);
+            return null;
         }
     },
+
 
 
     getWihDrawDetails: async (userAddress) => {
@@ -698,58 +627,39 @@ export const useStore = create((set, get) => ({
             const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
             const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-            // Get all direct referrals with level data
-            const directReferralRes = await contract.methods.getAllDirectReferralsWithCounts(userAddress).call();
+            // Get level-wise team (2D array: [level1[], level2[], ..., level6[]])
+            const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
 
-            // Get level wise ROI contribution
+            // Get level-wise accumulated ROI data
             const levelWiseROIRes = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
 
-            // Prepare referral count for each level
-            let referralCount = []; // { level: count }
+            // Prepare referral counts for each level (index 0 = level 1)
+            const referralCount = levelWiseTeam.map(levelArray => levelArray.length);
 
-            for (let i = 0; i < directReferralRes.referrals.length; i++) {
-                const referralAddress = directReferralRes.referrals[i][0];
-                const level = directReferralRes.referrals[i][1];
-                const levelNum = parseInt(level);
-
-                console.log(referralAddress, levelNum)
-
-                // ✅ Initialize count if not exists
-                if (!referralCount[levelNum - 1]) {
-                    referralCount[levelNum - 1] = 1;
-                } else {
-                    referralCount[levelNum - 1]++;
-                }
-            }
-
-            // Prepare final data combining both referral count and level-wise ROI
+            // Build final result using ROI data
             const result = [];
 
             for (let i = 0; i < levelWiseROIRes.length; i++) {
-                const level = levelWiseROIRes[i][0].toString();
-                const contributionRaw = levelWiseROIRes[i][1].toString();
-
-                // console.log(level, contributionRaw)
-
-
-                const levelNum = parseInt(level);
-                const contributionUSD = parseInt(contributionRaw) / 1e8;
+                const levelNum = parseInt(levelWiseROIRes[i].level); // Already from struct
+                const contributionRaw = levelWiseROIRes[i].accumulatedUsd;
+                const contributionUSD = Number(contributionRaw) / 1e8;
 
                 result.push({
                     level: levelNum,
-                    totalReferrals: referralCount[levelNum] || 0,  // default 0 if not exist
+                    totalReferrals: referralCount[levelNum - 1] || 0, // level 1 => index 0
                     dailyContribution: contributionUSD.toFixed(2)
                 });
             }
 
-            console.log("Referral Stats:", result);
+            console.log("✅ Referral Stats:", result);
             return result;
 
         } catch (err) {
-            console.log("Referral fetch error", err);
+            console.error("❌ Referral fetch error:", err);
             return [];
         }
     },
+
 
 
     userInvestmentWithDetails: async (userAddress) => {
@@ -782,7 +692,57 @@ export const useStore = create((set, get) => ({
             console.error("❌ Error in userInvestmentWithDetails:", error.message || error);
             return []; // Always return safe fallback
         }
-    }
+    },
+
+
+    ClaimAllReward: async (userAddress) => {
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const trxData = contract.methods.claimLevelROI().encodeABI();
+            const gasPrice = await web3.eth.getGasPrice();
+
+            let gasLimit;
+            try {
+                gasLimit = await web3.eth.estimateGas({
+                    from: userAddress,
+                    to: TCC_STAKING.contractAddress,
+                    data: trxData,
+                    value: '0'
+                });
+            } catch (error) {
+                if (
+                    error?.message?.includes("No ROI records found") ||
+                    error?.data?.message?.includes("No ROI records found")
+                ) {
+                    Swal.fire("Notice", "You have no ROI rewards to claim at this time.", "info");
+                } else {
+                    Swal.fire("Error", "Gas estimation failed. Please try again.", "error");
+                }
+                console.error("❌ Gas estimation failed:", error);
+                return null;
+            }
+
+            const tx = {
+                from: userAddress,
+                to: TCC_STAKING.contractAddress,
+                data: trxData,
+                gas: gasLimit,
+                gasPrice: gasPrice
+            };
+
+            return { trxData, tx };
+
+        } catch (error) {
+            console.error("❌ ClaimAllReward error:", error);
+            return null;
+        }
+    },
+
+
+
+
 
 
 
