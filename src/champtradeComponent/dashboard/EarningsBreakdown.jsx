@@ -200,6 +200,13 @@ const EarningsBreakdown = () => {
             <p className="text-xl sm:text-2xl font-bold text-yellow-500">${earningData?.referralIncome}</p>
             {/* <p className="text-xs text-yellow-500/70 mt-1">+5.8% from yesterday</p> */}
           </div>
+
+
+          <div className="bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] p-3 sm:p-4 rounded-lg border border-yellow-500/10 hover:border-yellow-500/30 transition-colors">
+            <p className="text-neutral-300 text-xs sm:text-sm mb-1">UnClaimed Income</p>
+            <p className="text-xl sm:text-2xl font-bold text-yellow-500">${earningData?.unclaimedAmt}</p>
+            <p className="text-xs text-yellow-500/70 mt-1">{earningData?.unclaimedTCCCount} TCC</p>
+          </div>
         </div>
 
         {/* Time Period Buttons - Scrollable on mobile */}

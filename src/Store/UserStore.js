@@ -183,10 +183,33 @@ export const useStore = create((set, get) => ({
             referralEarning += Number(userInvestments[i][1]);
         }
 
+        const timestampInSeconds = Math.floor(Date.now() / 1000);
+        const getWeekLevel = await contract.methods.getWeekLevelIncome(userAddress, timestampInSeconds).call();
+
+        let unclaimedUsdCount = 0;
+        let unclaimedTCCCount = 0;
+
+
+        if (Array.isArray(getWeekLevel.dailyIncomes) && getWeekLevel.dailyIncomes.length > 0) {
+            for (let i = 0; i < getWeekLevel.dailyIncomes.length; i++) {
+                // Adjust based on the structure returned by the smart contract
+                unclaimedUsdCount += Number(getWeekLevel.dailyIncomes[i].roiUsd || 0);
+                unclaimedTCCCount += Number(getWeekLevel.dailyIncomes[i].roiTcc || 0);
+
+            }
+        }
+
+
+
+        console.log("unclaimedUsdCount,unclaimedTCCCount", unclaimedUsdCount, unclaimedTCCCount, getWeekLevel)
+
+
         // 3️⃣ Return properly formatted object
         const earningsData = {
             directIncome: (totalDirectEarningUsd / 1e8).toFixed(5),
             referralIncome: (referralEarning / 1e8).toFixed(5),
+            unclaimedAmt: parseFloat(unclaimedUsdCount / 1e18).toString(),
+            unclaimedTCCCount: parseFloat(unclaimedTCCCount / 1e28).toFixed(5),
         };
 
         return earningsData;
@@ -516,13 +539,19 @@ export const useStore = create((set, get) => ({
         const userBalance = await contract.methods.balanceOf(userAddress).call();
         const TccPriceUsd = await contract1.methods.getTccPriceInUsd().call();
 
+        const timestampInSeconds = Math.floor(Date.now() / 1000);
+        const getWeekLevelIncome = await contract1.methods.getWeekLevelIncome(userAddress, timestampInSeconds).call();
+
+        console.log(getWeekLevelIncome)
+
+
 
         const data = {
             userBalance: parseInt(web3.utils.fromWei(userBalance, "ether")).toString(),
             TccPriceUsd: parseFloat(parseFloat(TccPriceUsd) / parseFloat(1e8)).toFixed(4),
-
-
-
+            ReferralTcc: (parseFloat(getWeekLevelIncome.totalRoiTcc) / 1e28).toFixed(5),
+            ReferralUsd: (parseFloat(getWeekLevelIncome.totalRoiUsd) / 1e18).toFixed(5),
+            dailyIncomes: getWeekLevelIncome.dailyIncomes,
         };
 
         console.log(data)
@@ -658,7 +687,7 @@ export const useStore = create((set, get) => ({
             return [];
         }
     },
- 
+
 
 
     userInvestmentWithDetails: async (userAddress) => {
@@ -834,7 +863,9 @@ export const useStore = create((set, get) => ({
             console.error("Error in getUserInfo:", error);
             return [];
         }
-    }
+    },
+
+
 
 
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Wallet, Clock, AlertCircle } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, Copy } from 'lucide-react';
 import { useStore } from '../../Store/UserStore';
 import { useTransaction } from '../../config/register';
 import Swal from 'sweetalert2';
@@ -28,6 +28,20 @@ const ClaimWithdrawPanel = () => {
 
 
   const tccPriceUsd = parseFloat(withdrawData?.userBalance) * parseFloat(withdrawData?.TccPriceUsd)
+
+
+  const [copiedMap, setCopiedMap] = useState({});
+
+
+  const handleCopy = (data, key) => {
+    navigator.clipboard.writeText(data);
+    setCopiedMap((prev) => ({ ...prev, [key]: true }));
+
+    setTimeout(() => {
+      setCopiedMap((prev) => ({ ...prev, [key]: false }));
+    }, 2000);
+  };
+
 
 
 
@@ -90,26 +104,19 @@ const ClaimWithdrawPanel = () => {
       <div className="bg-[rgba(20,20,20,0)] border border-yellow-500/50 p-6 rounded-lg ">
         <h3 className="text-lg font-semibold text-white mb-4">Claim Options</h3>
         <div className="space-y-4">
-          {/* <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
+          <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
+
             <div>
-              <p className="font-medium text-white">Daily Rewards</p>
-              <p className="text-sm text-gray-400">Available in 12 hours</p>
+              <p className="text-sm text-gray-400">Ready to claim</p>
+              <div className="text-yellow-500 font-semibold">$ {parseFloat(withdrawData?.ReferralUsd) || 0}</div>
             </div>
-            <Clock className="h-5 w-5 text-yellow-500" />
           </div>
           <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
             <div>
-              <p className="font-medium text-white">Team Bonus</p>
-              <p className="text-sm text-gray-400">Ready to claim</p>
-            </div>
-            <div className="text-yellow-500 font-semibold">25.5 TCC</div>
-          </div> */}
-          <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
-            <div>
               <p className="font-medium text-white">Referral Rewards</p>
-              <p className="text-sm text-gray-400">Ready to claim</p>
+              <div className="text-yellow-500 font-semibold">{withdrawData?.ReferralTcc || 0} TCC</div>
             </div>
-            <div className="text-yellow-500 font-semibold">97.95 TCC</div>
+
           </div>
         </div>
       </div>
@@ -132,6 +139,62 @@ const ClaimWithdrawPanel = () => {
           Withdrawals only Available on Sunday
         </p>
       </div>
+
+
+
+      <div className="w-full overflow-x-auto">
+        <table className="min-w-[900px] table-auto">
+          <thead>
+            <tr className="border-b border-yellow-500/20">
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">Level</th>
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[160px]">From Address</th>
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">Claim Status</th>
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">ROI TCC</th>
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">ROI USD</th>
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[140px]">Date</th>
+              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[140px]">Day</th>
+            </tr>
+          </thead>
+          <tbody>
+            {withdrawData?.dailyIncomes.length > 0 ? withdrawData.dailyIncomes.map((CurElm, index) => (
+              <tr key={`${index}-${CurElm.date}`} className="border-b border-yellow-500/10 hover:bg-yellow-500/5 transition-colors">
+                <td className="py-2 px-2 text-white text-xs whitespace-nowrap">{CurElm?.level.toString()}</td>
+                <td className="py-2 px-2 text-white text-xs whitespace-nowrap">
+                  <span className="text-sm text-golden-white">
+                    {CurElm.fromUser.slice(2, 7)}...{CurElm.fromUser.slice(-7)}
+                  </span>
+                  <button onClick={() => handleCopy(CurElm.fromUser, `wallet-${index}`)} className="ml-1 text-golden hover:text-white transition">
+                    <Copy className="h-4 w-4 inline" />
+                  </button>
+                  {copiedMap[`wallet-${index}`] && (
+                    <span className="ml-1 text-xs text-green-400">Copied!</span>
+                  )}
+                </td>
+                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                  {CurElm.isClaimed ? "Claimed" : "Not Claimed"}
+                </td>
+                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                  {(Number(CurElm.roiTcc) / 1e28).toFixed(4)}
+                </td>
+                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                  {(Number(CurElm.roiUsd) / 1e18).toFixed(4)}
+                </td>
+                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                  {new Date(Number(CurElm.date) * 1000).toLocaleString()}
+                </td>
+                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                  {new Date(Number(CurElm.day) * 86400 * 1000).toLocaleString()}
+                </td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan={7} className="py-3 text-center text-neutral-400 text-xs sm:text-sm">No referrals found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
     </div>
   );
 };
