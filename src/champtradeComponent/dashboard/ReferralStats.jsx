@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, ChevronRight, ChevronLeft, Table } from 'lucide-react';
+import { Users, ChevronRight, ChevronLeft, Table, Copy } from 'lucide-react';
 import { useStore } from '../../Store/UserStore';
 
 
@@ -8,6 +8,22 @@ const ReferralStats = () => {
   const [viewMode, setViewMode] = useState('cards');
 
   const [levelUsers, setLevelUsers] = useState([])
+
+
+  const [copiedMap, setCopiedMap] = useState({});
+
+
+  const handleCopy = (data, key) => {
+    navigator.clipboard.writeText(data);
+    setCopiedMap((prev) => ({ ...prev, [key]: true }));
+
+    setTimeout(() => {
+      setCopiedMap((prev) => ({ ...prev, [key]: false }));
+    }, 2000);
+  };
+
+
+
 
 
 
@@ -172,8 +188,8 @@ const ReferralStats = () => {
                 <thead>
                   <tr className="border-b border-yellow-500/20">
                     <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">ID</th>
-                    <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Wallet</th>
-                    <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Sponser</th>
+                    <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Wallet Address</th>
+                    <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Sponser Address</th>
                     <th className="text-right py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Total Investment</th>
                     <th className="text-right py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Total Tcc Invested</th>
 
@@ -183,11 +199,40 @@ const ReferralStats = () => {
                   {userinfo.map((CurElm, index) => (
                     <tr key={`${index} - ${CurElm.userID}`} className="border-b border-yellow-500/10 hover:bg-yellow-500/5 transition-colors">
                       <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">{CurElm?.userID.toString()}</td>
-                      <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap truncate max-w-[80px] xs:max-w-[100px] sm:max-w-none">
-                        {CurElm.address.slice(2, 10)}...{CurElm.address.slice(2, 6)}
+
+                      <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap  sm:max-w-none">
+
+                        <span className="text-sm text-golden-white">
+                          {CurElm.address.slice(2, 7)}...{CurElm.address.slice(-7)}
+                        </span>
+                        <button
+                          onClick={() => handleCopy(CurElm.address, `wallet-${index}`)}
+                          className="text-golden hover:text-white transition"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                        {copiedMap[`wallet-${index}`] && (
+                          <span className="text-xs text-green-400">Copied!</span>
+                        )}
+
                       </td>
                       <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">
-                        {CurElm.sponsor.slice(2, 10)}...{CurElm.sponsor.slice(2, 6)}
+
+
+                        <span className="text-sm text-golden-white">
+                          {CurElm.sponsor.slice(2, 7)}...{CurElm.sponsor.slice(-7)}
+                        </span>
+                        <button
+                          onClick={() => handleCopy(CurElm.sponsor, `sponsor-${index}`)}
+                          className="text-golden hover:text-white transition"
+                        >
+                          <Copy className="h-4 w-4" />
+                        </button>
+                        {copiedMap[`sponsor-${index}`] && (
+                          <span className="text-xs text-green-400">Copied!</span>
+                        )}
+
+
                       </td>
                       <td className="py-2 px-2 text-right text-yellow-500 text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">
                         {CurElm.totalInvestments.toString()}
