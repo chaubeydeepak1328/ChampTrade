@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, UserCheck, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, UserCheck, Filter, ChevronDown, ChevronUp, AlertCircle, AlertTriangle } from 'lucide-react';
 
 const Reward = () => {
   // Team stats by filter
@@ -40,10 +40,10 @@ const Reward = () => {
     <div className="space-y-6">
       {/* Team Statistics */}
       <div className="bg-[rgb(20,20,20)] p-4 sm:p-6 rounded-xl border-2 border-yellow-500/20">
-        <div className='w-full'> <h2 className="text-white text-xl typing m-auto">Achievemnet Reward Live Now</h2></div>
+        <div className='w-full'> <h2 className="text-white text-xl typing m-auto">Launching Reward Live Achievemnet</h2></div>
         <h3 className="text-lg font-semibold text-white mb-4">
           <span className="bg-gradient-to-r from-yellow-500 to-amber-600 bg-clip-text text-transparent">
-            Achievement Status
+            Achievement Eligibility
           </span>
         </h3>
         <div className="space-y-3">
@@ -54,7 +54,7 @@ const Reward = () => {
                 <p className="font-medium text-white">Tahiland Trip</p>
               </div>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">Record Comming Soon</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-300">200 ID</span>
           </div>
 
           {/* Ongoing Activity */}
@@ -64,7 +64,7 @@ const Reward = () => {
                 <p className="font-medium text-white">Goa Trip</p>
               </div>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">Record Comming Soon</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300">100 ID</span>
           </div>
 
           {/* Completed Activity */}
@@ -72,9 +72,16 @@ const Reward = () => {
             <div>
               <p className="font-medium text-white">manali Trip</p>
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">Record Comming Soon</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-300">50 ID</span>
           </div>
         </div>
+      </div>
+
+      <div className="flex items-start gap-3 p-4 bg-yellow-900/30 rounded-lg border border-yellow-500/30">
+        <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-yellow-400">
+          Term & Conditions 50% from any two leg rest 50% from from other legs
+        </p>
       </div>
 
       {/* Dropdown Options Below Activity Card */}

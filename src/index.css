@@ -14,7 +14,7 @@ input:-webkit-autofill {
   white-space: nowrap;
   border-right: 3px solid #facc15;
   width: fit-content;
-  animation: typing 4s steps(12, end) infinite, blink 0.75s step-end infinite;
+  animation: typing 6s steps(16, end) infinite, blink 0.75s step-end infinite;
 }
 
 /* Typing + pause + reset in a loop */
@@ -23,10 +23,10 @@ input:-webkit-autofill {
     width: 0;
   }
   40% {
-    width: 25ch;
+    width: 30ch;
   } /* typing */
   70% {
-    width: 25ch;
+    width: 30ch;
   } /* pause at full text */
   100% {
     width: 0;

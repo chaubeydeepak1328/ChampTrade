@@ -7,6 +7,8 @@ const ReferralStats = () => {
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [viewMode, setViewMode] = useState('cards');
 
+  const [levelUsers, setLevelUsers] = useState([])
+
 
 
   const handleLevelClick = (level) => {
@@ -43,14 +45,63 @@ const ReferralStats = () => {
     level: `L${levelData.level}`,
     isActive: levelData.totalReferrals !== 0,
     dailyContribution: parseFloat(levelData.dailyContribution),
-    totalReferrals: levelData.totalReferrals
+    totalReferrals: levelData.totalReferrals,
+    levelWiseTeam: levelData.levelWiseTeam
   })) || [];
+
+
+
+  // ================================================================================
+  // Get Users Information
+  // ================================================================================
+
+  const getUserInfo = useStore((state) => state.getUserInfo);
+  const [userinfo, setUserInfo] = useState();
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const response = await getUserInfo(levelUsers);
+      console.log(response);
+      setUserInfo(response)
+
+    }
+    if (levelUsers) {
+      fetchUserInfo();
+    }
+  }, [levelUsers])
+
 
 
 
   return (
     <div className="bg-[rgb(20,20,20)] rounded-xl p-3 sm:p-6 border-2 border-yellow-500/30 hover:shadow-[0_0_20px_rgb(250,204,21,0.1)] transition-all duration-300">
-      <div className="flex items-center gap-3 mb-4 sm:mb-6">
+      <div className="mt-4 sm:mt-6 p-3 sm:p-5 bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] rounded-lg sm:rounded-xl border-2 border-yellow-500/20">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
+          <div>
+            <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Active Referrals</p>
+            <p className="text-lg sm:text-2xl font-bold text-yellow-500">
+              {
+                RefferalDetails
+                  ? RefferalDetails.reduce((sum, item) => sum + item.totalReferrals, 0)
+                  : 0
+              }
+            </p>
+          </div>
+          <div>
+            <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Daily Earnings</p>
+            <p className="text-lg sm:text-2xl font-bold text-yellow-500">
+              ${
+                RefferalDetails
+                  ? RefferalDetails.reduce((sum, item) => sum + parseFloat(item.dailyContribution), 0).toFixed(2)
+                  : "0.00"
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+
+
+      <div className="flex items-center gap-3 mt-5 mb-4 sm:mb-6">
         <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-yellow-500/20 to-amber-400/20 rounded-full flex items-center justify-center">
           <Users className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
         </div>
@@ -78,7 +129,10 @@ const ReferralStats = () => {
               <div className="flex items-center justify-between mb-2 sm:mb-3">
                 <span className="text-yellow-500 font-bold text-sm sm:text-lg">{level.level}</span>
                 <button
-                  onClick={() => handleLevelClick(level)}
+                  onClick={() => {
+                    handleLevelClick(level);
+                    setLevelUsers(level.levelWiseTeam || []);
+                  }}
                   className="p-1 rounded-full hover:bg-yellow-500/10 transition-colors"
                 >
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" />
@@ -119,26 +173,27 @@ const ReferralStats = () => {
                   <tr className="border-b border-yellow-500/20">
                     <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">ID</th>
                     <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Wallet</th>
-                    <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Date</th>
-                    <th className="text-right py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Amount</th>
+                    <th className="text-left py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Sponser</th>
+                    <th className="text-right py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Total Investment</th>
+                    <th className="text-right py-2 px-2 text-yellow-500 font-medium text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">Total Tcc Invested</th>
+
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.from({ length: selectedLevel?.totalReferrals || 0 }).map((_, index) => (
-                    <tr key={index} className="border-b border-yellow-500/10 hover:bg-yellow-500/5 transition-colors">
-                      <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">REF-{selectedLevel?.level}-{index + 1}</td>
+                  {userinfo.map((CurElm, index) => (
+                    <tr key={`${index} - ${CurElm.userID}`} className="border-b border-yellow-500/10 hover:bg-yellow-500/5 transition-colors">
+                      <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">{CurElm?.userID.toString()}</td>
                       <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap truncate max-w-[80px] xs:max-w-[100px] sm:max-w-none">
-                        0x{Math.random().toString(16).slice(2, 10)}...{Math.random().toString(16).slice(2, 6)}
+                        {CurElm.address.slice(2, 10)}...{CurElm.address.slice(2, 6)}
                       </td>
                       <td className="py-2 px-2 text-white text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">
-                        {new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
+                        {CurElm.sponsor.slice(2, 10)}...{CurElm.sponsor.slice(2, 6)}
                       </td>
                       <td className="py-2 px-2 text-right text-yellow-500 text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">
-                        ${(Math.random() * 0.5 + 0.1).toFixed(2)}
+                        {CurElm.totalInvestments.toString()}
+                      </td>
+                      <td className="py-2 px-2 text-right text-yellow-500 text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">
+                        {(Number(CurElm.totalTccInvested) / 1e18).toFixed(4)}
                       </td>
                     </tr>
                   ))}
@@ -160,30 +215,7 @@ const ReferralStats = () => {
         </div>
       )}
 
-      <div className="mt-4 sm:mt-6 p-3 sm:p-5 bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] rounded-lg sm:rounded-xl border-2 border-yellow-500/20">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
-          <div>
-            <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Active Referrals</p>
-            <p className="text-lg sm:text-2xl font-bold text-yellow-500">
-              {
-                RefferalDetails
-                  ? RefferalDetails.reduce((sum, item) => sum + item.totalReferrals, 0)
-                  : 0
-              }
-            </p>
-          </div>
-          <div>
-            <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Daily Earnings</p>
-            <p className="text-lg sm:text-2xl font-bold text-yellow-500">
-              ${
-                RefferalDetails
-                  ? RefferalDetails.reduce((sum, item) => sum + parseFloat(item.dailyContribution), 0).toFixed(2)
-                  : "0.00"
-              }
-            </p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };

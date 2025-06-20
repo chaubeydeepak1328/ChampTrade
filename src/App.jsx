@@ -120,8 +120,8 @@ function App() {
                   <Route index element={<DashboardOverviewPage />} />
                   <Route path="StartChampTrade" element={<StartChampTrade />} />
                   <Route path="my-earnings" element={<MyEarningsPage />} />
-                  <Route path="my-team" element={<MyTeamPage />} />
-                  <Route path="my-referrals" element={<MyReferralsPage />} />
+                  <Route path="my-team" element={<MyReferralsPage />} />
+                  {/* <Route path="my-referrals" element={<MyReferralsPage />} /> */}
                   <Route path="reinvestment" element={<ReinvestmentCyclesPage />} />
                   <Route path="withdraw" element={<ClaimWithdrawPage />} />
                   <Route path="buy-tokens" element={<BuyTccPage />} />

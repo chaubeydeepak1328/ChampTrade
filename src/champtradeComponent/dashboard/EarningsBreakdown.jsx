@@ -203,7 +203,7 @@ const EarningsBreakdown = () => {
         </div>
 
         {/* Time Period Buttons - Scrollable on mobile */}
-        <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
+        {/* <div className="flex overflow-x-auto pb-2 gap-2 hide-scrollbar">
           <button
             onClick={() => handleTimePeriodChange('7days')}
             className={`flex-shrink-0 px-3 py-1 rounded-full transition-colors text-xs sm:text-sm ${timePeriod === '7days' ? 'bg-yellow-500/10 text-yellow-500' : 'text-neutral-300 hover:text-white hover:bg-[rgb(30,30,30)]'}`}
@@ -228,7 +228,7 @@ const EarningsBreakdown = () => {
           >
             All Time
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Add this to your global CSS */}

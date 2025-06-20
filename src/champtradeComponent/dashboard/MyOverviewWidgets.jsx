@@ -79,8 +79,8 @@ function MyOverviewWidgets() {
     {
       icon: TrendingUp,
       label: 'Weekly Income',
-      value: (cardInfo?.getWeekLevelIncome[1] ?? 0) + '  TCC',
-      subtext: '$' + (cardInfo?.getWeekLevelIncome[2] ?? 0)
+      value: '$ ' + cardInfo?.Daily_Income * 6,
+      subtext: ''
     }
   ];
 

@@ -10,6 +10,7 @@ import TCC_TEST_ABI from './TEST_CONTRACT.json';
 
 
 
+
 // const INFURA_URL = "https://bsc-testnet.infura.io/v3/32193d86ae664f1188540cfca7b790cf"
 // const web3 = new Web3(INFURA_URL);
 
@@ -167,33 +168,30 @@ export const useStore = create((set, get) => ({
 
 
     getMyEarningsData: async (userAddress) => {
-
         const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
         const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
         // 1️⃣ Get user investments
-        const userInvestments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+        const userInvestments = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
 
-        let totalDirectEarningUsd = 0;
+        // Direct earnings from level 1 (index 0)
+        const totalDirectEarningUsd = Number(userInvestments[0][1]);
 
-        for (let i = 0; i < userInvestments.length; i++) {
-            const roiReceived = parseInt(userInvestments[i][7]);
-            totalDirectEarningUsd += roiReceived;
+        // Accumulate referral earnings from level 2 onward
+        let referralEarning = 0;
+        for (let i = 1; i < userInvestments.length; i++) {
+            referralEarning += Number(userInvestments[i][1]);
         }
-
-        // Convert from 1e8 to normal USD
-        totalDirectEarningUsd = totalDirectEarningUsd / 1e8;
-
-        let totalReferralEarningUsd = 0;
 
         // 3️⃣ Return properly formatted object
         const earningsData = {
-            directIncome: parseFloat(totalDirectEarningUsd).toFixed(5),
-            referralIncome: totalReferralEarningUsd.toFixed(2),
-        }
+            directIncome: (totalDirectEarningUsd / 1e8).toFixed(5),
+            referralIncome: (referralEarning / 1e8).toFixed(5),
+        };
 
         return earningsData;
     },
+
 
 
 
@@ -640,14 +638,15 @@ export const useStore = create((set, get) => ({
             const result = [];
 
             for (let i = 0; i < levelWiseROIRes.length; i++) {
-                const levelNum = parseInt(levelWiseROIRes[i].level); // Already from struct
-                const contributionRaw = levelWiseROIRes[i].accumulatedUsd;
+                const levelNum = parseInt(levelWiseROIRes[i][0]); // Already from struct
+                const contributionRaw = levelWiseROIRes[i][1];
                 const contributionUSD = Number(contributionRaw) / 1e8;
 
                 result.push({
                     level: levelNum,
                     totalReferrals: referralCount[levelNum - 1] || 0, // level 1 => index 0
-                    dailyContribution: contributionUSD.toFixed(2)
+                    dailyContribution: contributionUSD.toFixed(4),
+                    levelWiseTeam: levelWiseTeam[i]
                 });
             }
 
@@ -659,7 +658,7 @@ export const useStore = create((set, get) => ({
             return [];
         }
     },
-
+ 
 
 
     userInvestmentWithDetails: async (userAddress) => {
@@ -759,6 +758,83 @@ export const useStore = create((set, get) => ({
             return null;
         }
     },
+
+
+    getUserById: async (userId) => {
+        try {
+            if (!userId) throw new Error("User ID is required.");
+
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+                throw new Error("TCC_STAKING ABI or contract address missing.");
+            }
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const address = await contract.methods.getUserAddressByID(userId).call();
+
+            return address;
+        } catch (error) {
+            console.error("Error in getUserById:", error);
+            return null;
+        }
+    },
+
+
+
+    // getUserInfo: async (userAddress) => {
+    //     try {
+    //         if (!userAddress) throw new Error("User userAddress is required.");
+
+    //         const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+    //         if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+    //             throw new Error("TCC_STAKING ABI or contract address missing.");
+    //         }
+
+    //         const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+    //         const address = await contract.methods.users(userAddress).call();
+
+    //         return address;
+    //     } catch (error) {
+    //         console.error("Error in getUserById:", error);
+    //         return null;
+    //     }
+    // }
+
+    getUserInfo: async (userAddresses) => {
+        try {
+            if (!Array.isArray(userAddresses)) {
+                throw new Error("userAddresses must be an array.");
+            }
+
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const userDataArray = await Promise.all(
+                userAddresses.map(async (address) => {
+                    try {
+                        const userInfo = await contract.methods.users(address).call();
+                        return { address, ...userInfo };
+                    } catch (err) {
+                        console.error(`Failed to fetch data for address ${address}:`, err);
+                        return null;
+                    }
+                })
+            );
+
+            // Filter out any null entries
+            return userDataArray.filter(Boolean);
+        } catch (error) {
+            console.error("Error in getUserInfo:", error);
+            return [];
+        }
+    }
 
 
 

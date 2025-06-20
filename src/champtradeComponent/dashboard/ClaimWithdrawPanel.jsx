@@ -62,14 +62,14 @@ const ClaimWithdrawPanel = () => {
 
 
   const widthdrawAll = async () => {
-    // if (address && isConnected) {
-    const response = ClaimAllReward(userAddress);
-    if (response) {
-      await handleSendTx(response);
+    if (address && isConnected) {
+      const response = ClaimAllReward(userAddress);
+      if (response) {
+        await handleSendTx(response);
+      }
+    } else {
+      Swal.fire("Warning", "Connect your wallet first", "warning");
     }
-    //   } else {
-    //     Swal.fire("Warning", "Connect your wallet first", "warning");
-    // }
 
   }
 
@@ -80,7 +80,7 @@ const ClaimWithdrawPanel = () => {
       <div className="bg-[rgba(20,20,20,0)] border border-yellow-500/50 p-6 rounded-lg ">
         <div className="flex items-center gap-3 mb-4">
           <Wallet className="h-6 w-6 text-yellow-500" />
-          <h3 className="text-lg font-semibold text-white">Available Balance</h3>
+          <h3 className="text-sm lg:text-lg font-semibold text-white">Available Balance</h3>
         </div>
         <div className="text-3xl font-bold text-yellow-500 mb-2">{withdrawData?.userBalance} TCC</div>
         <p className="text-gray-400">≈ ${tccPriceUsd} USD</p>
@@ -90,7 +90,7 @@ const ClaimWithdrawPanel = () => {
       <div className="bg-[rgba(20,20,20,0)] border border-yellow-500/50 p-6 rounded-lg ">
         <h3 className="text-lg font-semibold text-white mb-4">Claim Options</h3>
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
+          {/* <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
             <div>
               <p className="font-medium text-white">Daily Rewards</p>
               <p className="text-sm text-gray-400">Available in 12 hours</p>
@@ -103,7 +103,7 @@ const ClaimWithdrawPanel = () => {
               <p className="text-sm text-gray-400">Ready to claim</p>
             </div>
             <div className="text-yellow-500 font-semibold">25.5 TCC</div>
-          </div>
+          </div> */}
           <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
             <div>
               <p className="font-medium text-white">Referral Rewards</p>
@@ -116,9 +116,9 @@ const ClaimWithdrawPanel = () => {
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <button disabled={isSunday}
+        <button disabled={!isSunday}
           onClick={() => widthdrawAll()} className={`w-full ${isSunday ? "bg-yellow-600 hover:bg-yellow-500" : ""}  text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500`}>
-          {isSunday ? "Claim on Sunday" : "Claim All Rewards"}
+          {!isSunday ? "Claim on Sunday" : "Claim All Rewards"}
         </button>
         {/* <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
           Withdraw to Wallet

@@ -3,6 +3,8 @@ import { Clock, RefreshCw, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide
 import { useStore } from '../../Store/UserStore';
 import Swal from 'sweetalert2';
 import { useTransaction } from '../../config/register';
+import Lottie from 'react-lottie';
+import coinAnimaton from '../../utils/CoinAnimation.json'
 
 const PlanProgress = () => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -114,29 +116,37 @@ const PlanProgress = () => {
           investedAmountInTCC: Number(inv.investedAmountInTCC) / 1e8,
           developerFeeTCC: Number(inv.developerFeeTCC) / 1e18,
           principalInUSD: Number(inv.principalInUSD) / 1e8,
-          // principalInTCC: Number(inv.principalInTCC) / 1e18,
+          principalInTCC: Number(inv.principalInTCC) / 1e18,
           totalROIReceived: Number(inv.totalROIReceived) / 1e8,
-          totalAccumulatedAmountForInvestment: Number(inv.totalAccumulatedAmountForInvestment) / 1e8,
-          startDay: Number(inv.startDay),
+
+          // ✅ Fixed BigInt-safe conversion
+          totalAccumulatedAmountForInvestment: Number(BigInt(inv.totalAccumulatedAmountForInvestment) * 86400n) / 1e8,
+
+          startDay: new Date(Number(inv.startDay) * 86400 * 1000).toLocaleString(),
           roiDaysClaimed: Number(inv.roiDaysClaimed),
+
           lastInvestmentTimestamp: new Date(Number(inv.lastInvestmentTimestamp) * 1000).toLocaleString(),
-          lastReinvestmentDay: Number(inv.lastReinvestmentDay),
-          lastClaimDay: Number(inv.lastClaimDay),
-          lastLevelCapResetDay: Number(inv.lastLevelCapResetDay),
+          lastReinvestmentDay: new Date(Number(inv.lastReinvestmentDay) * 86400 * 1000).toLocaleString(),
+          lastClaimDay: new Date(Number(inv.lastClaimDay) * 86400 * 1000).toLocaleString(),
+          lastLevelCapResetDay: new Date(Number(inv.lastLevelCapResetDay) * 86400 * 1000).toLocaleString(),
+
           isCompleted: inv.isCompleted,
           claimCount: Number(inv.claimCount),
+
           claimedROIs: inv.claimedROIs.map((roi) => ({
             day: Number(roi.day),
             amountUsd: Number(roi.amountUsd) / 1e8,
             amountTcc: Number(roi.amountTcc) / 1e18,
             claimedAt: new Date(Number(roi.claimedAt) * 1000).toLocaleString(),
           })),
+
           remainingDays: Number(inv.remainingDays),
           dailyROIUsd: Number(inv.dailyROIUsd) / 1e8,
           dailyROITcc: Number(inv.dailyROITcc) / 1e18,
           totalExpectedROIUsd: Number(inv.totalExpectedROIUsd) / 1e8,
           totalExpectedROITcc: Number(inv.totalExpectedROITcc) / 1e18,
         }));
+
 
         console.log("Parsed InvestmentView:", parsed);
         setUserInvDet(parsed);
@@ -154,6 +164,16 @@ const PlanProgress = () => {
   const claimedDays = TOTAL_DAYS - selectedInvestment?.daysRemainingInCycle || 0;
   const progress = (claimedDays / TOTAL_DAYS) * 100;
 
+
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: coinAnimaton,  // <-- REQUIRED
+    rendererSettings: {
+      preserveAspectRatio: 'xMidYMid slice',
+    },
+  };
 
 
 
@@ -276,12 +296,21 @@ const PlanProgress = () => {
           <div className="text-[10px] sm:text-sm text-gray-400 bg-[rgb(20,20,20)] border border-yellow-500 p-2 sm:p-4 rounded">
             {selectedInvestment && (
               <div className="space-y-3 sm:space-y-6">
-                <div className="text-white p-4 border border-yellow-500/20 rounded-lg">
-                  <p>Investment ID: {selectedInvestment.investmentId}</p>
-                  <p>Days Claimed: {selectedInvestment.daysClaimed}</p>
-                  <p>Days Remaining: {selectedInvestment.daysRemainingInCycle}</p>
-                  <p>Next Claim In: {selectedInvestment.timeUntilClaim}</p>
-                  <p>Can Claim Now: {selectedInvestment.canClaimNow ? "Yes" : "No"}</p>
+                <div className="flex  text-white p-4 border border-yellow-500/20 rounded-lg">
+                  <div className='w-[50%]'>
+                    <p>Investment ID: {selectedInvestment.investmentId}</p>
+                    <p>Days Claimed: {selectedInvestment.daysClaimed}</p>
+                    <p>Days Remaining: {selectedInvestment.daysRemainingInCycle}</p>
+                    <p>Next Claim In: {selectedInvestment.timeUntilClaim}</p>
+                    <p>Can Claim Now: {selectedInvestment.canClaimNow ? "Yes" : "No"}</p>
+                  </div>
+
+                  <div className="flex w-[50%] ">
+
+                    <Lottie options={defaultOptions} height={200} width={200} />
+                  </div>
+
+
                 </div>
 
                 <div className="flex items-center gap-3 text-sm text-gray-300">
@@ -329,14 +358,24 @@ const PlanProgress = () => {
               <thead className="bg-[rgb(25,25,25)]">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">TCC Price Durind Investment</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>s
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Price During investment</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (USD)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (TCC)</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Developer Fee</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Development Fee</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (USD)</th>
-                  {/* <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (TCC)</th> */}
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Principal (TCC)</th>
+
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">ROI Received</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Accumulated Total</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Start Day</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">ROI Days</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Cap Reset Day</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claim Count</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Last Invest</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Last Reinvest</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Last Claim</th>
+
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Days Claimed</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Remaining Days</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Daily ROI (USD)</th>
@@ -353,10 +392,42 @@ const PlanProgress = () => {
                     <td className="px-4 py-3 text-sm text-white">{inv.investmentID}</td>
                     <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment).toFixed(4)}</td>
                     <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.investedAmountInTCC).toFixed(4)} TCC</td>
+                    <td className="px-4 py-3 text-sm text-white">   {(parseFloat(inv.principalInTCC) + parseFloat(inv.developerFeeTCC)).toFixed(4)} TCC</td>
                     <td className="px-4 py-3 text-sm text-white">{(inv.developerFeeTCC).toFixed(4)} TCC</td>
                     <td className="px-4 py-3 text-sm text-white">${(inv.principalInUSD).toFixed(2)}</td>
-                    {/* <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</td> */}
+                    <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</td>
+
+                    <td className="px-4 py-3 text-sm text-white">
+                      ${inv.totalROIReceived.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      ${inv.totalAccumulatedAmountForInvestment.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.startDay}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.roiDaysClaimed}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.lastLevelCapResetDay}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.claimCount}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.lastInvestmentTimestamp}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.lastReinvestmentDay}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-white">
+                      {inv.lastClaimDay}
+                    </td>
+
+
+
+
                     <td className="px-4 py-3 text-sm text-white">${(inv.totalROIReceived).toFixed(2)}</td>
                     <td className="px-4 py-3 text-sm text-white">{inv.roiDaysClaimed}</td>
                     <td className="px-4 py-3 text-sm text-white">{inv.remainingDays}</td>
@@ -399,20 +470,22 @@ const PlanProgress = () => {
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Invested TCC</p>
-                    <p className="text-sm text-white">{(inv.investedAmountInTCC).toFixed(4)} TCC</p>
+                    <p className="text-sm text-white">
+                      {(parseFloat(inv.principalInTCC) + parseFloat(inv.developerFeeTCC)).toFixed(4)} TCC
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-yellow-500">Developer Fee (TCC)</p>
+                    <p className="text-xs text-yellow-500">Development Fee (TCC)</p>
                     <p className="text-sm text-white">{(inv.developerFeeTCC).toFixed(4)} TCC</p>
                   </div>
                   <div>
                     <p className="text-xs text-yellow-500">Principal USD</p>
                     <p className="text-sm text-white">${(inv.principalInUSD).toFixed(2)}</p>
                   </div>
-                  {/* <div>
+                  <div>
                     <p className="text-xs text-yellow-500">Principal TCC</p>
                     <p className="text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</p>
-                  </div> */}
+                  </div>
                   <div>
                     <p className="text-xs text-yellow-500">ROI Received</p>
                     <p className="text-sm text-white">${(inv.totalROIReceived).toFixed(2)}</p>
