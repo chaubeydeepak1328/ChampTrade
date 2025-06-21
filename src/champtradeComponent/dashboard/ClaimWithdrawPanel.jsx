@@ -96,7 +96,7 @@ const ClaimWithdrawPanel = () => {
           <Wallet className="h-6 w-6 text-yellow-500" />
           <h3 className="text-sm lg:text-lg font-semibold text-white">Available Balance</h3>
         </div>
-        <div className="text-3xl font-bold text-yellow-500 mb-2">{withdrawData?.userBalance} TCC</div>
+        <div className="text-3xl font-bold text-yellow-500 mb-2">{withdrawData?.userBalance} TCC2.0</div>
         <p className="text-gray-400">≈ ${tccPriceUsd} USD</p>
       </div>
 
@@ -141,59 +141,63 @@ const ClaimWithdrawPanel = () => {
       </div>
 
 
+      {withdrawData?.dailyIncomes &&
+        (
+          <div className="w-full overflow-x-auto">
+            <table className="min-w-[900px] table-auto">
+              <thead>
+                <tr className="border-b border-yellow-500/20">
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">Level</th>
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[160px]">From Address</th>
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">Claim Status</th>
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">ROI TCC</th>
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">ROI USD</th>
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[140px]">Date</th>
+                  <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[140px]">Day</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawData?.dailyIncomes.length > 0 ? withdrawData.dailyIncomes.map((CurElm, index) => (
+                  <tr key={`${index}-${CurElm.date}`} className="border-b border-yellow-500/10 hover:bg-yellow-500/5 transition-colors">
+                    <td className="py-2 px-2 text-white text-xs whitespace-nowrap">{CurElm?.level.toString()}</td>
+                    <td className="py-2 px-2 text-white text-xs whitespace-nowrap">
+                      <span className="text-sm text-golden-white">
+                        {CurElm.fromUser.slice(2, 7)}...{CurElm.fromUser.slice(-7)}
+                      </span>
+                      <button onClick={() => handleCopy(CurElm.fromUser, `wallet-${index}`)} className="ml-1 text-golden hover:text-white transition">
+                        <Copy className="h-4 w-4 inline" />
+                      </button>
+                      {copiedMap[`wallet-${index}`] && (
+                        <span className="ml-1 text-xs text-green-400">Copied!</span>
+                      )}
+                    </td>
+                    <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                      {CurElm.isClaimed ? "Claimed" : "Not Claimed"}
+                    </td>
+                    <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                      {(Number(CurElm.roiTcc) / 1e28).toFixed(4)}
+                    </td>
+                    <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                      {(Number(CurElm.roiUsd) / 1e18).toFixed(4)}
+                    </td>
+                    <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                      {new Date(Number(CurElm.date) * 1000).toLocaleString()}
+                    </td>
+                    <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
+                      {new Date(Number(CurElm.day) * 86400 * 1000).toLocaleString()}
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={7} className="py-3 text-center text-neutral-400 text-xs sm:text-sm">No referrals found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      <div className="w-full overflow-x-auto">
-        <table className="min-w-[900px] table-auto">
-          <thead>
-            <tr className="border-b border-yellow-500/20">
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">Level</th>
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[160px]">From Address</th>
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">Claim Status</th>
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">ROI TCC</th>
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap">ROI USD</th>
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[140px]">Date</th>
-              <th className="text-left py-2 px-2 text-yellow-500 text-[11px] whitespace-nowrap min-w-[140px]">Day</th>
-            </tr>
-          </thead>
-          <tbody>
-            {withdrawData?.dailyIncomes.length > 0 ? withdrawData.dailyIncomes.map((CurElm, index) => (
-              <tr key={`${index}-${CurElm.date}`} className="border-b border-yellow-500/10 hover:bg-yellow-500/5 transition-colors">
-                <td className="py-2 px-2 text-white text-xs whitespace-nowrap">{CurElm?.level.toString()}</td>
-                <td className="py-2 px-2 text-white text-xs whitespace-nowrap">
-                  <span className="text-sm text-golden-white">
-                    {CurElm.fromUser.slice(2, 7)}...{CurElm.fromUser.slice(-7)}
-                  </span>
-                  <button onClick={() => handleCopy(CurElm.fromUser, `wallet-${index}`)} className="ml-1 text-golden hover:text-white transition">
-                    <Copy className="h-4 w-4 inline" />
-                  </button>
-                  {copiedMap[`wallet-${index}`] && (
-                    <span className="ml-1 text-xs text-green-400">Copied!</span>
-                  )}
-                </td>
-                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
-                  {CurElm.isClaimed ? "Claimed" : "Not Claimed"}
-                </td>
-                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
-                  {(Number(CurElm.roiTcc) / 1e28).toFixed(4)}
-                </td>
-                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
-                  {(Number(CurElm.roiUsd) / 1e18).toFixed(4)}
-                </td>
-                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
-                  {new Date(Number(CurElm.date) * 1000).toLocaleString()}
-                </td>
-                <td className="py-2 px-2 text-yellow-500 text-xs whitespace-nowrap">
-                  {new Date(Number(CurElm.day) * 86400 * 1000).toLocaleString()}
-                </td>
-              </tr>
-            )) : (
-              <tr>
-                <td colSpan={7} className="py-3 text-center text-neutral-400 text-xs sm:text-sm">No referrals found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+        )
+      }
 
     </div>
   );
