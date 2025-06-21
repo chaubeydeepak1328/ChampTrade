@@ -43,15 +43,15 @@ function DashboardHeader() {
       <div className="max-w-7xl ms-0 me-0 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
-          <Link
-            to="/"
+          <div
+
             className="flex items-center gap-2 justify-center lg:justify-start lg:ml-0 w-full lg:w-auto"
           >
             <img src={trade} alt="trade-logo" className="h-10 w-10 sm:h-12 sm:w-12" />
             <h1 className="text-xl font-bold text-white whitespace-nowrap">
               <span className="text-yellow-500">CHAMP</span> TRADE
             </h1>
-          </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">

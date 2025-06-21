@@ -649,33 +649,89 @@ export const useStore = create((set, get) => ({
     },
 
 
+    // myReferral: async (userAddress) => {
+    //     try {
+    //         const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+    //         const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+    //         // Get level-wise team (2D array: [level1[], level2[], ..., level6[]])
+    //         const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
+
+    //         // Get level-wise accumulated ROI data
+    //         const levelWiseROIRes = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
+
+    //         // Prepare referral counts for each level (index 0 = level 1)
+    //         const referralCount = levelWiseTeam.map(levelArray => levelArray.length);
+
+    //         // Build final result using ROI data
+    //         const result = [];
+
+    //         for (let i = 0; i < levelWiseROIRes.length; i++) {
+    //             const levelNum = parseInt(levelWiseROIRes[i][0]); // Already from struct
+    //             const contributionRaw = levelWiseROIRes[i][1];
+    //             const contributionUSD = Number(contributionRaw) / 1e8;
+
+    //             result.push({
+    //                 level: levelNum,
+    //                 totalReferrals: referralCount[levelNum - 1] || 0, // level 1 => index 0
+    //                 dailyContribution: contributionUSD.toFixed(4),
+    //                 levelWiseTeam: levelWiseTeam[i]
+    //             });
+    //         }
+
+    //         console.log("✅ Referral Stats:", result);
+    //         return result;
+
+    //     } catch (err) {
+    //         console.error("❌ Referral fetch error:", err);
+    //         return [];
+    //     }
+    // },
+
     myReferral: async (userAddress) => {
         try {
             const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
             const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-            // Get level-wise team (2D array: [level1[], level2[], ..., level6[]])
+            // 1️⃣ Get the level-wise team (2D array: [level1[], level2[], ..., level6[]])
             const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
 
-            // Get level-wise accumulated ROI data
-            const levelWiseROIRes = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
+            // 2️⃣ Get current week's income
+            const timestampInSeconds = Math.floor(Date.now() / 1000);
+            const getWeekLevel = await contract.methods.getWeekLevelIncome(userAddress, timestampInSeconds).call();
 
-            // Prepare referral counts for each level (index 0 = level 1)
+            // 3️⃣ Prepare referral counts per level
             const referralCount = levelWiseTeam.map(levelArray => levelArray.length);
 
-            // Build final result using ROI data
+            // 4️⃣ Sum roiUsd per level (1 to 6)
+            const roiByLevel = {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0
+            };
+
+            if (Array.isArray(getWeekLevel.dailyIncomes)) {
+                getWeekLevel.dailyIncomes.forEach((entry) => {
+                    const level = Number(entry.level);
+                    const roiUsd = Number(entry.roiUsd || 0);
+                    if (roiByLevel[level] !== undefined) {
+                        roiByLevel[level] += roiUsd;
+                    }
+                });
+            }
+
+            // 5️⃣ Build final result
             const result = [];
 
-            for (let i = 0; i < levelWiseROIRes.length; i++) {
-                const levelNum = parseInt(levelWiseROIRes[i][0]); // Already from struct
-                const contributionRaw = levelWiseROIRes[i][1];
-                const contributionUSD = Number(contributionRaw) / 1e8;
-
+            for (let level = 1; level <= 6; level++) {
                 result.push({
-                    level: levelNum,
-                    totalReferrals: referralCount[levelNum - 1] || 0, // level 1 => index 0
-                    dailyContribution: contributionUSD.toFixed(4),
-                    levelWiseTeam: levelWiseTeam[i]
+                    level: level,
+                    totalReferrals: referralCount[level - 1] || 0,
+                    dailyContribution: (roiByLevel[level] / 1e18).toFixed(4),
+                    levelWiseTeam: levelWiseTeam[level - 1] || []
                 });
             }
 
@@ -687,6 +743,7 @@ export const useStore = create((set, get) => ({
             return [];
         }
     },
+
 
 
 
