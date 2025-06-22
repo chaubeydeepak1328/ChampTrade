@@ -251,7 +251,7 @@ export const useStore = create((set, get) => ({
 
         // 3️⃣ Return properly formatted object
         const earningsData = {
-            directIncome: parseFloat(totalDirectEarningUsd).toFixed(5),
+            directIncome: parseFloat(totalDirectEarningUsd / 1e10).toFixed(5),
             referralIncome: parseFloat(totalReferralEarningUsd).toFixed(2),
             unclaimedAmt: " Comming Soon",
             unclaimedTCCCount: '',
@@ -648,7 +648,7 @@ export const useStore = create((set, get) => ({
             };
         }
     },
-    
+
     getUserIndWdrDetails: async (userAddress) => {
         try {
             const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
@@ -902,7 +902,7 @@ export const useStore = create((set, get) => ({
                               <line x1="12" x2="12" y1="9" y2="13" />
                               <line x1="12" x2="12.01" y1="17" y2="17" />
                             </svg>
-                            <p style="margin-top: 12px;">Claim is only available on <b>Sunday</b>.</p>
+                            <p style="margin-top: 12px;">SomeThingWent Wrong .</p>
                           </div>
                         `,
                         background: '#1a1a1a',

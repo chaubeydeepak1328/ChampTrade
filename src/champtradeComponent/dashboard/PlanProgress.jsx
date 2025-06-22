@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Clock, RefreshCw, ChevronDown, ChevronUp, X, CheckCircle } from 'lucide-react';
 import { useStore } from '../../Store/UserStore';
 import Swal from 'sweetalert2';
 import { useTransaction } from '../../config/register';
 import Lottie from 'react-lottie';
 import coinAnimaton from '../../utils/CoinAnimation.json'
+import { useAppKitAccount } from '@reown/appkit/react';
 
 const PlanProgress = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
+  const { address, isConnected } = useAppKitAccount();
 
   const userData = JSON.parse(localStorage.getItem("userData") || "null");
   const userAddress = userData?.userAddress || null;
@@ -79,15 +81,21 @@ const PlanProgress = () => {
 
 
   const handleClaim = async () => {
-    try {
-      const response = await claimRoiIndividual(userAddress, selectedInvestmentId)
 
-      if (response) {
-        await handleSendTx(response);
+    if (address && isConnected && (address == userAddress)) {
+      try {
+        const response = await claimRoiIndividual(userAddress, selectedInvestmentId)
+
+        if (response) {
+          await handleSendTx(response);
+        }
+      } catch (error) {
+        console.log(error)
       }
-    } catch (error) {
-      console.log(error)
+    } else {
+      Swal.fire("Warning", "Connect your wallet first", "warning");
     }
+
   }
 
 
@@ -117,10 +125,10 @@ const PlanProgress = () => {
           developerFeeTCC: Number(inv.developerFeeTCC) / 1e18,
           principalInUSD: Number(inv.principalInUSD) / 1e8,
           principalInTCC: Number(inv.principalInTCC) / 1e18,
-          totalROIReceived: Number(inv.totalROIReceived) / 1e8,
+          totalROIReceived: Number(inv.totalROIReceived) / 1e18,
 
           // ✅ Fixed BigInt-safe conversion
-          totalAccumulatedAmountForInvestment: Number(BigInt(inv.totalAccumulatedAmountForInvestment) * 86400n) / 1e8,
+          totalAccumulatedAmountForInvestment: Number(BigInt(inv.totalAccumulatedAmountForInvestment)) / 1e18,
 
           startDay: new Date(Number(inv.startDay) * 86400 * 1000).toLocaleString(),
           roiDaysClaimed: Number(inv.roiDaysClaimed),
@@ -161,9 +169,16 @@ const PlanProgress = () => {
 
   const TOTAL_DAYS = 940;
 
-  const claimedDays = TOTAL_DAYS - selectedInvestment?.daysRemainingInCycle || 0;
-  const progress = (claimedDays / TOTAL_DAYS) * 100;
+  // const claimedDays = TOTAL_DAYS - selectedInvestment?.daysRemainingInCycle || 0;
+  // const progress = (claimedDays / TOTAL_DAYS) * 100;
 
+  const claimedDays = useMemo(() => {
+    return selectedInvestment ? TOTAL_DAYS - selectedInvestment.daysRemainingInCycle : 0;
+  }, [selectedInvestment]);
+
+  const progress = useMemo(() => {
+    return (claimedDays / TOTAL_DAYS) * 100;
+  }, [claimedDays]);
 
 
   const defaultOptions = {
@@ -386,62 +401,71 @@ const PlanProgress = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-yellow-500/10 bg-[rgb(15,15,15)]">
-                {userInvDet?.map((inv, index) => (
-                  <tr key={inv.investmentID || index} className="hover:bg-yellow-500/5">
-                    <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
-                    <td className="px-4 py-3 text-sm text-white">{inv.investmentID}</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment).toFixed(4)}</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">   {(parseFloat(inv.principalInTCC) + parseFloat(inv.developerFeeTCC)).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.developerFeeTCC).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.principalInUSD).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</td>
+                {userInvDet.length > 0 && userInvDet ? (
+                  userInvDet?.map((inv, index) => (
+                    <tr key={inv.investmentID || index} className="hover:bg-yellow-500/5">
+                      <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
+                      <td className="px-4 py-3 text-sm text-white">{inv.investmentID}</td>
+                      <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment).toFixed(4)}</td>
+                      <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-white">   {(parseFloat(inv.principalInTCC) + parseFloat(inv.developerFeeTCC)).toFixed(4)} TCC</td>
+                      <td className="px-4 py-3 text-sm text-white">{(inv.developerFeeTCC).toFixed(4)} TCC</td>
+                      <td className="px-4 py-3 text-sm text-white">${(inv.principalInUSD).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-white">{(inv.principalInTCC).toFixed(4)} TCC</td>
 
-                    <td className="px-4 py-3 text-sm text-white">
-                      ${inv.totalROIReceived.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      ${inv.totalAccumulatedAmountForInvestment.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.startDay}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.roiDaysClaimed}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.lastLevelCapResetDay}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.claimCount}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.lastInvestmentTimestamp}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.lastReinvestmentDay}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-white">
-                      {inv.lastClaimDay}
-                    </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        ${inv.totalROIReceived.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        ${inv.totalAccumulatedAmountForInvestment.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.startDay}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.roiDaysClaimed}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.lastLevelCapResetDay}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.claimCount}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.lastInvestmentTimestamp}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.lastReinvestmentDay}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.lastClaimDay}
+                      </td>
 
 
 
 
-                    <td className="px-4 py-3 text-sm text-white">${(inv.totalROIReceived).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{inv.roiDaysClaimed}</td>
-                    <td className="px-4 py-3 text-sm text-white">{inv.remainingDays}</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.dailyROIUsd).toFixed(4)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.dailyROITcc).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm text-white">${(inv.totalExpectedROIUsd).toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-white">{(inv.totalExpectedROITcc).toFixed(4)} TCC</td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className={`px-2 py-1 text-xs rounded-full ${inv.isCompleted ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-500'}`}>
-                        {inv.isCompleted ? 'Completed' : 'Active'}
-                      </span>
+                      <td className="px-4 py-3 text-sm text-white">${(inv.totalROIReceived).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-white">{inv.roiDaysClaimed}</td>
+                      <td className="px-4 py-3 text-sm text-white">{inv.remainingDays}</td>
+                      <td className="px-4 py-3 text-sm text-white">${(inv.dailyROIUsd).toFixed(4)}</td>
+                      <td className="px-4 py-3 text-sm text-white">{(inv.dailyROITcc).toFixed(4)} TCC</td>
+                      <td className="px-4 py-3 text-sm text-white">${(inv.totalExpectedROIUsd).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-white">{(inv.totalExpectedROITcc).toFixed(4)} TCC</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`px-2 py-1 text-xs rounded-full ${inv.isCompleted ? 'bg-green-900/50 text-green-400' : 'bg-yellow-900/50 text-yellow-500'}`}>
+                          {inv.isCompleted ? 'Completed' : 'Active'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={X} className="text-center text-gray-400 py-4">
+                      No data found
                     </td>
                   </tr>
-                ))}
+
+                )}
               </tbody>
             </table>
           </div>

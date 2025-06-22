@@ -6,6 +6,8 @@ import Swal from 'sweetalert2';
 import { useAppKitAccount } from '@reown/appkit/react';
 
 const ClaimWithdrawPanel = () => {
+  const [loading, setLoading] = useState(false);
+
 
   const userData = JSON.parse(localStorage.getItem("userData") || "null");
   const userAddress = userData?.userAddress || null;
@@ -62,8 +64,6 @@ const ClaimWithdrawPanel = () => {
         icon: 'success',
         confirmButtonText: 'Close'
       });
-
-      setLoading(false)
     }
   }, [hash]);
 
@@ -71,21 +71,46 @@ const ClaimWithdrawPanel = () => {
 
   const isSunday = new Date().getDay() === 0;
 
-  console.log(isSunday)
-
 
 
   const widthdrawAll = async () => {
-    if (address && isConnected) {
-      const response = ClaimAllReward(userAddress);
-      if (response) {
-        await handleSendTx(response);
+    if (address && isConnected && (address == userAddress)) {
+
+      if (isSunday) {
+
+        setLoading(true);
+        try {
+          const response = await ClaimAllReward(userAddress);
+
+          console.log(response)
+          if (response) {
+            await handleSendTx(response);
+            setLoading(false)
+
+
+          } else {
+            setLoading(false)
+
+            Swal.fire("Warning", "No rewards to claim.", "warning");
+          }
+        } catch (error) {
+          setLoading(false)
+
+          console.error("Claim error:", error);
+          Swal.fire("Error", "Something went wrong!", "error");
+        }
+      } else {
+        setLoading(false)
+
+        Swal.fire("Warning", "Claim Available only on Sunday", "warning");
       }
     } else {
+      setLoading(false)
+
       Swal.fire("Warning", "Connect your wallet first", "warning");
     }
+  };
 
-  }
 
 
   return (
@@ -97,7 +122,7 @@ const ClaimWithdrawPanel = () => {
           <h3 className="text-sm lg:text-lg font-semibold text-white">Available Balance</h3>
         </div>
         <div className="text-3xl font-bold text-yellow-500 mb-2">{withdrawData?.userBalance} TCC2.0</div>
-        <p className="text-gray-400">≈ ${tccPriceUsd} USD</p>
+        <p className="text-gray-400">≈ ${parseFloat(tccPriceUsd).toFixed(4)} USD</p>
       </div>
 
       {/* Claim Options */}
@@ -123,9 +148,9 @@ const ClaimWithdrawPanel = () => {
 
       {/* Action Buttons */}
       <div className="space-y-3">
-        <button disabled={!isSunday}
-          onClick={() => widthdrawAll()} className={`w-full ${isSunday ? "bg-yellow-600 hover:bg-yellow-500" : ""}  text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500`}>
-          {!isSunday ? "Claim on Sunday" : "Claim All Rewards"}
+        <button disabled={!isSunday || loading}
+          onClick={widthdrawAll} className={`w-full ${isSunday ? "bg-yellow-600 hover:bg-yellow-500" : ""}  text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500`}>
+          {loading ? "Processing..." : (!isSunday ? "Claim on Sunday" : "Claim All Rewards")}
         </button>
         {/* <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
           Withdraw to Wallet
