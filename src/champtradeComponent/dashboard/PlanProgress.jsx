@@ -29,6 +29,8 @@ const PlanProgress = () => {
 
 
 
+
+
   const getUserIndWdrDetails = useStore((state) => state.getUserIndWdrDetails);
 
   useEffect(() => {
@@ -43,7 +45,8 @@ const PlanProgress = () => {
         daysClaimed: Number(item.daysClaimed),
         daysRemainingInCycle: Number(item.daysRemainingInCycle),
         timeUntilClaim: item.timeUntilClaim,
-        currentDayOfWeek: item.currentDayOfWeek
+        currentDayOfWeek: item.currentDayOfWeek,
+        unClaimedAmt: Number(item.UnClaimedWeekRoi.totalUnclaimedAmount)
       }));
 
       setInvestments(normalized);
@@ -249,17 +252,7 @@ const PlanProgress = () => {
           </h3>
 
           <div className="relative">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center gap-1 text-yellow-500 hover:text-yellow-400 transition-colors text-xs sm:text-base"
-            >
-              Options
-              {showDropdown ? (
-                <ChevronUp className="w-3 h-3 sm:w-4 sm:h-4" />
-              ) : (
-                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4" />
-              )}
-            </button>
+
 
             <div className="mt-2">
               <select
@@ -320,6 +313,7 @@ const PlanProgress = () => {
               <div className="space-y-3 sm:space-y-6">
                 <div className="flex  text-white p-4 border border-yellow-500/20 rounded-lg">
                   <div className='w-[50%]'>
+                    <button className='bg-green-800 rounded p-1'>Un Claim: {(parseFloat(selectedInvestment.unClaimedAmt) / 1e18).toFixed(4)}</button>
                     <p>Investment ID: {selectedInvestment.investmentId}</p>
                     <p>Days Claimed: {selectedInvestment.daysClaimed}</p>
                     <p>Days Remaining: {selectedInvestment.daysRemainingInCycle}</p>
@@ -635,7 +629,7 @@ const PlanProgress = () => {
                         {inv.amountInUSD ? `$${(Number(inv.amountInUSD) / 1e8).toFixed(4)}` : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-sm text-white">
-                        {inv.amountInTCC ? `${(Number(inv.amountInTCC) / 1e18).toFixed(2)} TCC` : 'N/A'}
+                        {inv.amountInTCC ? `${((Number(inv.amountInTCC) * 4) / 1e18).toFixed(2)} TCC` : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-sm text-white">
                         {inv.roiDaysClaimed ? `${Number(inv.roiDaysClaimed).toFixed(0)} Days` : 'N/A'}
@@ -666,7 +660,7 @@ const PlanProgress = () => {
                   <div>
                     <p className="text-xs text-yellow-500">Claimed (TCC)</p>
                     <p className="text-sm text-white">
-                      {inv.amountInTCC ? `${(Number(inv.amountInTCC) / 1e18).toFixed(2)} TCC` : 'N/A'}
+                      {inv.amountInTCC ? `${((Number(inv.amountInTCC) * 4) / 1e18).toFixed(2)} TCC` : 'N/A'}
                     </p>
                   </div>
                   <div>

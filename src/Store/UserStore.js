@@ -30,7 +30,24 @@ const Contract = {
 }
 
 
+function getWeekNumberFromStartDay(startDay) {
+    const startDayNumber = Number(startDay);
+    if (isNaN(startDayNumber) || startDayNumber <= 0) return 1;
 
+    const currentDay = Math.floor(Date.now() / 1000 / 86400); // today's day count since epoch
+
+    // Find the Monday after or on the start day
+    const startWeekday = new Date(startDayNumber * 86400 * 1000).getUTCDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const daysUntilNextMonday = (8 - startWeekday) % 7;
+    const firstMonday = startDayNumber + daysUntilNextMonday;
+
+    // If today is before the first Monday after investment, it's week 1
+    if (currentDay < firstMonday) return 1;
+
+    // Every Monday after that is a new week
+    const weeksPassed = Math.floor((currentDay - firstMonday) / 7);
+    return weeksPassed + 2; // +1 for 0-indexed, +1 to include week of first Monday
+}
 
 
 
@@ -619,6 +636,12 @@ export const useStore = create((set, get) => ({
             // 📌 4. Get start day (for optional display)
             const investments = await contract1.methods.getUserInvestmentsWithDetails(userAddress).call();
             let startDay = investments?.[0]?.startDay || 0;
+
+            const startTimestamp = parseFloat(startDay) * 86400 * 1000;
+
+            console.log("startTimestamp", startTimestamp);
+
+
             let startDate = startDay ? new Date(Number(startDay) * 86400 * 1000).toLocaleString() : "N/A";
 
             // 📌 5. Calculate current week number (0-based, +1 for 1-indexed)
@@ -725,15 +748,27 @@ export const useStore = create((set, get) => ({
 
 
 
+            const investments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+            // let startDay = investments?.[0]?.startDay || 0;
+            // const startTimestamp = parseFloat(startDay) * 86400 * 1000;
+
+            const startDay = Number(investments[0]?.startDay); // UNIX day (not ms)
+            const currentWeek = getWeekNumberFromStartDay(startDay);
+
+            console.log("currentWeek", currentWeek, startDay)
+
+
             const invetmentData = [];
             const claimInvestment = [];
 
             for (let i = 0; i < investmentId.length; i++) {
 
-                const [response, claimHistory] = await Promise.all([
+                const [response, claimHistory, weeklyRoi] = await Promise.all([
                     contract.methods.getNextClaimInfo(userAddress, investmentId[i]).call(),
-                    contract.methods.getClaimHistory(userAddress, investmentId[i]).call()
+                    contract.methods.getClaimHistory(userAddress, investmentId[i]).call(),
+                    contract.methods.getInvestmentWeekROI(userAddress, investmentId[i], currentWeek).call()
                 ]);
+                console.log("weeklyRoi", weeklyRoi)
 
 
                 claimInvestment.push(claimHistory)
@@ -748,7 +783,12 @@ export const useStore = create((set, get) => ({
                     daysClaimed: response.daysClaimed,
                     daysRemainingInCycle: response.daysRemainingInCycle,
                     investmentId: investmentId[i],
-                    claimHistory: claimHistory
+                    claimHistory: claimHistory,
+                    UnClaimedWeekRoi: {
+                        totalClaimedAmount: weeklyRoi.totalClaimedAmount,
+                        totalUnclaimedAmount: weeklyRoi.totalUnclaimedAmount,
+                        unclaimedDays: weeklyRoi.unclaimedDays
+                    }
                 })
 
             }
@@ -1091,6 +1131,27 @@ export const useStore = create((set, get) => ({
         }
     },
 
+
+    LevelClaiWithrawHistory: async (userAddress) => {
+        try {
+
+
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const claimHist = await contract.methods.getLevelClaimHistory(userAddress).call();
+
+            return claimHist
+
+
+        } catch (error) {
+            console.error("Error in getUserInfo:", error);
+            return [];
+        }
+    }
 
 
 

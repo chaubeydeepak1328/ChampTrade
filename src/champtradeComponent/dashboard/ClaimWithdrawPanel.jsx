@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Wallet, Clock, AlertCircle, Copy } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, Copy, RefreshCw } from 'lucide-react';
 import { useStore } from '../../Store/UserStore';
 import { useTransaction } from '../../config/register';
 import Swal from 'sweetalert2';
@@ -110,6 +110,29 @@ const ClaimWithdrawPanel = () => {
       Swal.fire("Warning", "Connect your wallet first", "warning");
     }
   };
+
+
+  // ===========================================================
+  // widthdraw History
+  // ===========================================================
+
+  const [claimHistory, setClaimHistory] = useState([]);
+
+  const LevelClaiWithrawHistory = useStore((state) => state.LevelClaiWithrawHistory)
+
+  useEffect(() => {
+    const fetchClaim = async () => {
+      const response = await LevelClaiWithrawHistory(userAddress)
+      setClaimHistory(response)
+
+      console.log(response)
+    }
+
+
+    if (userAddress) {
+      fetchClaim();
+    }
+  }, [userAddress])
 
 
 
@@ -223,6 +246,102 @@ const ClaimWithdrawPanel = () => {
 
         )
       }
+
+
+      {/* ===================================================== */}
+      {/* Claim History */}
+      {/* ===================================================== */}
+
+      <div className="space-y-6 mx-auto mt-4">
+        <p className="text-yellow-500 font-bold text-xl">Claim History</p>
+
+        <div className="bg-[rgb(20,20,20)] rounded-xl p-6 border border-yellow-500/20">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+            <RefreshCw className="w-6 h-6 text-yellow-500" />
+            Claim History
+          </h3>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-yellow-500/20">
+            <table className="min-w-[1600px] divide-y divide-yellow-500/20">
+              <thead className="bg-[rgb(25,25,25)]">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed (USD)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed (TCC)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed At</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-yellow-500/10 bg-[rgb(15,15,15)]">
+                {claimHistory && claimHistory.length > 0 ? (
+                  claimHistory.map((inv, index) => (
+                    <tr key={inv.receivedID || index} className="hover:bg-yellow-500/5">
+                      <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
+                      <td className="px-4 py-3 text-sm text-white">{inv.receivedID.toString()}</td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.amountInUSD ? `$${(Number(inv.amountInUSD) / 1e8).toFixed(4)}` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.amountInTCC ? `${((Number(inv.amountInTCC) * 4) / 1e18).toFixed(2)} TCC` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.noOfDaysReceivedFor ? `${Number(inv.noOfDaysReceivedFor).toFixed(0)} Days` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.receivedAt ? new Date(Number(inv.receivedAt) * 1000).toLocaleString() : 'N/A'}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="text-center text-gray-400 py-4">No data found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {claimHistory?.map((inv, index) => (
+              <div key={inv.receivedID || index} className="bg-[rgb(30,30,30)] p-4 rounded-lg border border-yellow-500/20">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-yellow-500">Investment ID</p>
+                    <p className="text-sm text-white">{inv.receivedID.toString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed (TCC)</p>
+                    <p className="text-sm text-white">
+                      {inv.amountInTCC ? `${((Number(inv.amountInTCC) * 4) / 1e18).toFixed(2)} TCC` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed (USD)</p>
+                    <p className="text-sm text-white">
+                      {inv.amountInUSD ? `$${(Number(inv.amountInUSD) / 1e8).toFixed(2)}` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed</p>
+                    <p className="text-sm text-white">
+                      {inv.noOfDaysReceivedFor ? `${inv.noOfDaysReceivedFor.toString()} Days` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed At</p>
+                    <p className="text-sm text-white">
+                      {inv.receivedAt ? new Date(Number(inv.receivedAt) * 1000).toLocaleString() : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
     </div>
   );
