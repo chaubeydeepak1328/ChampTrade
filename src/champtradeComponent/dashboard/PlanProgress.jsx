@@ -373,7 +373,7 @@ const PlanProgress = () => {
               <thead className="bg-[rgb(25,25,25)]">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>s
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Price During investment</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (USD)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (TCC)</th>

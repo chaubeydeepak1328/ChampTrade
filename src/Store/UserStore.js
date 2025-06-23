@@ -115,9 +115,8 @@ export const useStore = create((set, get) => ({
             const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
             // Parallel fetching
-            const [userInvestments, userCompStats, levelWiseTeam] = await Promise.all([
+            const [userInvestments, levelWiseTeam] = await Promise.all([
                 contract.methods.getUserInvestmentsWithDetails(userAddress).call(),
-                contract.methods.getUserComprehensiveStats(userAddress).call(),
                 contract.methods.getLevelWiseTeam(userAddress).call()
             ]);
 
@@ -139,10 +138,13 @@ export const useStore = create((set, get) => ({
             let totalInvestedTCC = 0n;
             let totalEarningsTCC = 0n;
             let dailyIncomeUSD = 0n;
+            let Reinvest_Reserve = 0n;
+
 
             for (const inv of userInvestments) {
                 totalInvestedTCC += BigInt(inv.investedAmountInTCC || 0);
                 totalEarningsTCC += BigInt(inv.totalROIReceived || 0);
+                Reinvest_Reserve += BigInt(inv.dailyReinvestmentReserve || 0);
                 dailyIncomeUSD += BigInt(inv.dailyROIUsd || 0);
             }
 
@@ -151,7 +153,7 @@ export const useStore = create((set, get) => ({
             const CardInfo = {
                 My_PortFolio: (Number(totalInvestedTCC) / 1e8).toFixed(2),
                 Total_Earnings: (Number(totalEarningsTCC) / 1e18).toFixed(2),
-                Reinvest_Reserve: (Number(userCompStats.totalReinvestmentReserve || 0) / 1e8).toFixed(2),
+                Reinvest_Reserve: (Number(Reinvest_Reserve) / 1e8).toFixed(2),
                 Daily_Income: (Number(dailyIncomeUSD) / 1e8).toFixed(2),
                 Active_Referrals: referralCount,
                 // getWeekLevelIncome: (Number(getWeekLevelIncome.totalRoiUsd || 0) / 1e8).toFixed(2)
@@ -221,19 +223,15 @@ export const useStore = create((set, get) => ({
         const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
         const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-        // 1️⃣ Get user investments
-        const userInvestments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+
         const levelroi = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
 
-        let totalDirectEarningUsd = 0;
+        console.log(levelroi)
 
-        for (let i = 0; i < userInvestments.length; i++) {
-            const roiReceived = parseInt(userInvestments[i][7]);
-            totalDirectEarningUsd += roiReceived;
-        }
+        let totalDirectEarningUsd = parseFloat(levelroi[0][1]);
 
-        // Convert from 1e8 to normal USD
-        totalDirectEarningUsd = totalDirectEarningUsd / 1e8;
+
+
 
 
         // const dumm = [
@@ -251,8 +249,8 @@ export const useStore = create((set, get) => ({
 
         // 3️⃣ Return properly formatted object
         const earningsData = {
-            directIncome: parseFloat(totalDirectEarningUsd / 1e10).toFixed(5),
-            referralIncome: parseFloat(totalReferralEarningUsd).toFixed(2),
+            directIncome: parseFloat(totalDirectEarningUsd / 1e8).toFixed(5),
+            referralIncome: parseFloat(totalReferralEarningUsd / 1e8).toFixed(2),
             unclaimedAmt: " Comming Soon",
             unclaimedTCCCount: '',
         }
@@ -611,9 +609,8 @@ export const useStore = create((set, get) => ({
 
             // Get LevelWiseRefferal
             const levelWiseTeam = await contract1.methods.getLevelWiseTeam(userAddress).call();
-
-            // Flatten and count total referrals from all 6 levels
             const referralCount = levelWiseTeam.reduce((acc, levelArray) => acc + levelArray.length, 0);
+
 
             // Get user token balance
             const userBalance = await contract.methods.balanceOf(userAddress).call();
@@ -622,15 +619,87 @@ export const useStore = create((set, get) => ({
             const rawTccPriceUsd = await contract1.methods.getTccPriceInUsd().call();
             const tccPriceUsd = Number(rawTccPriceUsd) / 1e8;
 
-            // Calculate total claimable reward
-            const referralUsd = referralCount * 0.20;
-            const referralTcc = referralUsd / tccPriceUsd;
+
+            // 📌 4. Get start day (for optional display)
+            const investments = await contract1.methods.getUserInvestmentsWithDetails(userAddress).call();
+            let startDay = investments?.[0]?.startDay || 0;
+            let startDate = startDay ? new Date(Number(startDay) * 86400 * 1000).toLocaleString() : "N/A";
+
+            // 📌 5. Calculate current week number (0-based, +1 for 1-indexed)
+            const currentDay = Math.floor(Date.now() / 1000 / 86400);
+            // const weekNumber = Math.floor(currentDay / 7) + 1;
+
+            const daysSinceStart = currentDay - Number(startDay);
+            const weekNumber = daysSinceStart > 0 ? Math.floor(daysSinceStart / 7) + 1 : 1;
+
+            console.log("weekNumber", weekNumber)
+
+            // 📌 6. Get this week's level income
+            // 📌 6. Get this week's level income with pagination
+            const pageSize = 5;
+            let pageNumber = 1;
+            let totalPages = 1;
+            let allWeekIncomeData = [];
+
+            try {
+                const firstPage = await contract1.methods.getWeekLevelIncome(userAddress, weekNumber, pageSize, pageNumber).call();
+                totalPages = Number(firstPage.totalPages);
+
+                // Ensure summary is array-like before pushing
+                if (Array.isArray(firstPage.summary)) {
+                    allWeekIncomeData = allWeekIncomeData.concat(firstPage.summary);
+                } else {
+                    allWeekIncomeData.push(firstPage.summary); // push the single tuple object
+                }
+
+                for (let i = 2; i <= totalPages; i++) {
+                    const page = await contract1.methods.getWeekLevelIncome(userAddress, weekNumber, pageSize, i).call();
+
+                    if (Array.isArray(page.summary)) {
+                        allWeekIncomeData = allWeekIncomeData.concat(page.summary);
+                    } else {
+                        allWeekIncomeData.push(page.summary);
+                    }
+                }
+
+                console.log("✅ All week income data:", allWeekIncomeData);
+            } catch (error) {
+                console.error("❌ Error fetching paginated week income:", error.message || error);
+            }
+
+
+            const referredUsd = allWeekIncomeData[0].dailyIncomes.reduce(
+                (acc, item) => acc + Number(item.roiUsd),
+                0
+            );
+
+            const referredTcc = allWeekIncomeData[0].dailyIncomes.reduce(
+                (acc, item) => acc + Number(item.roiTcc),
+                0
+            );
+
+
+            console.log("referredUsd, referredTcc", referredUsd, referredTcc)
+            // levelWiseTeam.reduce((acc, levelArray) => acc + levelArray.length, 0);
+
+
+            const referredUsd1 = allWeekIncomeData.reduce(
+                (acc, item) => acc + Number(item.totalRoiUsd),
+                0
+            );
+
+            const referredTcc2 = allWeekIncomeData.reduce(
+                (acc, item) => acc + Number(item.totalRoiTcc),
+                0
+            );
+
+            console.log("referredUsd1, referredTcc2", referredUsd1 / 1e18, referredTcc2 / 1e28)
 
             const data = {
                 userBalance: parseFloat(web3.utils.fromWei(userBalance, "ether")).toFixed(4),
                 TccPriceUsd: tccPriceUsd.toFixed(4),
-                ReferralUsd: referralUsd.toFixed(5),
-                ReferralTcc: referralTcc.toFixed(5),
+                ReferralUsd: parseFloat(Number(referredUsd1) / 1e18).toFixed(4),
+                ReferralTcc: parseFloat(Number(referredTcc2) / 1e28).toFixed(4),
                 referralCount,
             };
 
@@ -744,28 +813,26 @@ export const useStore = create((set, get) => ({
             const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
             const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-            // Get level-wise team (2D array: [level1[], level2[], ..., level6[]])
             const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
-
-            // Get level-wise accumulated ROI data
             const levelWiseROIRes = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
 
-            // Prepare referral counts for each level (index 0 = level 1)
-            const referralCount = levelWiseTeam.map(levelArray => levelArray.length);
-
-            // Build final result using ROI data
             const result = [];
 
-            for (let i = 0; i < levelWiseROIRes.length; i++) {
-                const levelNum = parseInt(levelWiseROIRes[i][0]); // Already from struct
-                const contributionRaw = levelWiseROIRes[i][1];
+            // Use MAX_LEVELS = 6; assumed from contract context
+            const MAX_LEVELS = 6;
+
+            for (let i = 0; i < MAX_LEVELS; i++) {
+                const team = levelWiseTeam[i] || [];
+                const roiData = levelWiseROIRes.find(lvl => parseInt(lvl.level) === i + 1 || parseInt(lvl[0]) === i + 1);
+
+                const contributionRaw = roiData ? roiData[1] : "0"; // fallback to 0 if missing
                 const contributionUSD = Number(contributionRaw) / 1e8;
 
                 result.push({
-                    level: levelNum,
-                    totalReferrals: referralCount[levelNum - 1] || 0, // level 1 => index 0
+                    level: i + 1,
+                    totalReferrals: team.length,
                     dailyContribution: contributionUSD.toFixed(4),
-                    levelWiseTeam: levelWiseTeam[i]
+                    levelWiseTeam: team,
                 });
             }
 
@@ -777,6 +844,7 @@ export const useStore = create((set, get) => ({
             return [];
         }
     },
+
 
     // myReferral: async (userAddress) => {
     //     try {
