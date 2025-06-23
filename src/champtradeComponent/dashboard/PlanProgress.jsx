@@ -24,6 +24,8 @@ const PlanProgress = () => {
   const [selectedInvestmentId, setSelectedInvestmentId] = useState('');
   const [investments, setInvestments] = useState([]);
 
+  const [claimHistory, setClaimHistory] = useState([]);
+
 
 
 
@@ -35,7 +37,7 @@ const PlanProgress = () => {
       const res = await getUserIndWdrDetails(userAddress);
 
       // Normalize data properly
-      const normalized = res?.map(item => ({
+      const normalized = res.invetmentData?.map(item => ({
         investmentId: Number(item.investmentId),
         canClaimNow: item.canClaimNow,
         daysClaimed: Number(item.daysClaimed),
@@ -45,6 +47,11 @@ const PlanProgress = () => {
       }));
 
       setInvestments(normalized);
+
+
+
+      console.log("res.claimInvestment", res.claimInvestment)
+      setClaimHistory(...res.claimInvestment)
 
       if (normalized?.length > 0) {
         setSelectedInvestmentId(normalized[0].investmentId);
@@ -357,7 +364,13 @@ const PlanProgress = () => {
           </div>
         </div>
       </div>
+
+
+
+      {/* ================================================================================== */}
       {/* Purchase History */}
+      {/* ================================================================================== */}
+
       <div className="space-y-6  mx-auto mt-4">
         <p className='text-yellow-500 font-bold text-xl'>Purchase History</p>
         {/* New Transaction History Card with Responsive Table */}
@@ -460,9 +473,7 @@ const PlanProgress = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={X} className="text-center text-gray-400 py-4">
-                      No data found
-                    </td>
+                    <td colSpan={6} className="text-center text-gray-400 py-4">No data found</td>
                   </tr>
 
                 )}
@@ -476,10 +487,7 @@ const PlanProgress = () => {
             {userInvDet?.map((inv, index) => (
               <div key={inv.investmentID || index} className="bg-[rgb(30,30,30)] p-4 rounded-lg border border-yellow-500/20">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-yellow-500">S. No</p>
-                    <p className="text-sm text-white">{index + 1}</p>
-                  </div>
+
                   <div>
                     <p className="text-xs text-yellow-500">Investment ID</p>
                     <p className="text-sm text-white">{inv.investmentID}</p>
@@ -588,6 +596,104 @@ const PlanProgress = () => {
 
         </div>
       </div>
+
+
+
+      {/* ================================================================================== */}
+      {/* Claim History */}
+      {/* ================================================================================== */}
+
+      <div className="space-y-6 mx-auto mt-4">
+        <p className="text-yellow-500 font-bold text-xl">Claim History</p>
+
+        <div className="bg-[rgb(20,20,20)] rounded-xl p-6 border border-yellow-500/20">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+            <RefreshCw className="w-6 h-6 text-yellow-500" />
+            Investment Claim Details
+          </h3>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto rounded-lg border border-yellow-500/20">
+            <table className="min-w-[1600px] divide-y divide-yellow-500/20">
+              <thead className="bg-[rgb(25,25,25)]">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed (USD)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed (TCC)</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed At</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-yellow-500/10 bg-[rgb(15,15,15)]">
+                {claimHistory && claimHistory.length > 0 ? (
+                  claimHistory.map((inv, index) => (
+                    <tr key={inv.id || index} className="hover:bg-yellow-500/5">
+                      <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
+                      <td className="px-4 py-3 text-sm text-white">{inv.id.toString()}</td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.amountInUSD ? `$${(Number(inv.amountInUSD) / 1e8).toFixed(4)}` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.amountInTCC ? `${(Number(inv.amountInTCC) / 1e18).toFixed(2)} TCC` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.roiDaysClaimed ? `${Number(inv.roiDaysClaimed).toFixed(0)} Days` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-white">
+                        {inv.claimedAt ? new Date(Number(inv.claimedAt) * 1000).toLocaleString() : 'N/A'}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="text-center text-gray-400 py-4">No data found</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {claimHistory?.map((inv, index) => (
+              <div key={inv.id || index} className="bg-[rgb(30,30,30)] p-4 rounded-lg border border-yellow-500/20">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-yellow-500">Investment ID</p>
+                    <p className="text-sm text-white">{inv.id.toString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed (TCC)</p>
+                    <p className="text-sm text-white">
+                      {inv.amountInTCC ? `${(Number(inv.amountInTCC) / 1e18).toFixed(2)} TCC` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed (USD)</p>
+                    <p className="text-sm text-white">
+                      {inv.amountInUSD ? `$${(Number(inv.amountInUSD) / 1e8).toFixed(2)}` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed</p>
+                    <p className="text-sm text-white">
+                      {inv.roiDaysClaimed ? `${Number(inv.roiDaysClaimed).toFixed(0)} Days` : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-yellow-500">Claimed At</p>
+                    <p className="text-sm text-white">
+                      {inv.claimedAt ? new Date(Number(inv.claimedAt) * 1000).toLocaleString() : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
 
     </>
   );

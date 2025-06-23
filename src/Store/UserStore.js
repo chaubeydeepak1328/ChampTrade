@@ -219,45 +219,41 @@ export const useStore = create((set, get) => ({
 
 
     getMyEarningsData: async (userAddress) => {
+        try {
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-        const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // 📌 Fetch level-wise accumulated ROI
+            const levelRoiData = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
 
+            console.log("📊 Level ROI:", levelRoiData);
 
-        const levelroi = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
+            // 📌 Direct income (level 1 ROI) in USD (8 decimals)
+            const totalDirectEarningUsd = Number(levelRoiData?.[0]?.[1] || 0);
 
-        console.log(levelroi)
+            // 📌 Referral income from levels 2–6
+            const totalReferralEarningUsd = levelRoiData.slice(1).reduce((acc, level) => {
+                return acc + Number(level?.[1] || 0);
+            }, 0);
 
-        let totalDirectEarningUsd = parseFloat(levelroi[0][1]);
+            // 📦 Final formatted object
+            return {
+                directIncome: (totalDirectEarningUsd / 1e8).toFixed(5),
+                referralIncome: (totalReferralEarningUsd / 1e8).toFixed(2),
+                unclaimedAmt: "Coming Soon",
+                unclaimedTCCCount: "",
+            };
 
-
-
-
-
-        // const dumm = [
-        //     [1, 8],
-        //     [2, 0],
-        //     [3, 0],
-        //     [4, 0],
-        //     [5, 0],
-        //     [6, 0]
-        // ]
-
-        const totalReferralEarningUsd = levelroi.slice(1).reduce((acc, level) => acc + Number(level[1]), 0);
-
-
-
-        // 3️⃣ Return properly formatted object
-        const earningsData = {
-            directIncome: parseFloat(totalDirectEarningUsd / 1e8).toFixed(5),
-            referralIncome: parseFloat(totalReferralEarningUsd / 1e8).toFixed(2),
-            unclaimedAmt: " Comming Soon",
-            unclaimedTCCCount: '',
+        } catch (error) {
+            console.error("❌ Error in getMyEarningsData:", error.message || error);
+            return {
+                directIncome: "0.00000",
+                referralIncome: "0.00",
+                unclaimedAmt: "Coming Soon",
+                unclaimedTCCCount: "",
+            };
         }
-
-        return earningsData;
     },
-
 
 
 
@@ -727,11 +723,21 @@ export const useStore = create((set, get) => ({
             // come in Array format
             const investmentId = await contract.methods.getUserInvestmentIDs(userAddress).call();
 
+
+
             const invetmentData = [];
+            const claimInvestment = [];
 
             for (let i = 0; i < investmentId.length; i++) {
 
-                const response = await contract.methods.getNextClaimInfo(userAddress, investmentId[i]).call();
+                const [response, claimHistory] = await Promise.all([
+                    contract.methods.getNextClaimInfo(userAddress, investmentId[i]).call(),
+                    contract.methods.getClaimHistory(userAddress, investmentId[i]).call()
+                ]);
+
+
+                claimInvestment.push(claimHistory)
+
                 invetmentData.push({
                     nextClaimTimestamp: response.nextClaimTimestamp,
                     secondsUntilClaim: response.secondsUntilClaim,
@@ -742,13 +748,18 @@ export const useStore = create((set, get) => ({
                     daysClaimed: response.daysClaimed,
                     daysRemainingInCycle: response.daysRemainingInCycle,
                     investmentId: investmentId[i],
+                    claimHistory: claimHistory
                 })
 
             }
 
-            console.log(invetmentData)
+            console.log(invetmentData,
+                claimInvestment)
 
-            return invetmentData
+            return {
+                invetmentData: invetmentData,
+                claimInvestment: claimInvestment
+            }
 
         } catch (error) {
             console.log(error)
