@@ -42,6 +42,7 @@ import ViewUser from './pages/ViewUser';
 import RegisterNewUser from './pages/RegisterNewUser';
 import StartChampTrade from './champtradeComponent/dashboard/StartChampTrade';
 import RefferedUser from './pages/RefferedUser';
+import WeekIncome from './ChampTradepages/WeekIncome';
 
 // Setup for React Query
 const queryClient = new QueryClient();
@@ -121,6 +122,9 @@ function App() {
                   <Route path="StartChampTrade" element={<StartChampTrade />} />
                   <Route path="my-earnings" element={<MyEarningsPage />} />
                   <Route path="my-team" element={<MyReferralsPage />} />
+
+                  <Route path="week-income" element={<WeekIncome />} />
+
                   {/* <Route path="my-referrals" element={<MyReferralsPage />} /> */}
                   <Route path="reinvestment" element={<ReinvestmentCyclesPage />} />
                   <Route path="withdraw" element={<ClaimWithdrawPage />} />

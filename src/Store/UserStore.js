@@ -649,7 +649,9 @@ export const useStore = create((set, get) => ({
             // const weekNumber = Math.floor(currentDay / 7) + 1;
 
             const daysSinceStart = currentDay - Number(startDay);
-            const weekNumber = daysSinceStart > 0 ? Math.floor(daysSinceStart / 7) + 1 : 1;
+            // const weekNumber = daysSinceStart > 0 ? Math.floor(daysSinceStart / 7) + 1 : 1;
+
+            const weekNumber = getWeekNumberFromStartDay(startDay)
 
             console.log("weekNumber", weekNumber)
 
@@ -1151,7 +1153,204 @@ export const useStore = create((set, get) => ({
             console.error("Error in getUserInfo:", error);
             return [];
         }
+    },
+
+
+
+    // getUserAllWeek: async (userAddress) => {
+    //     try {
+    //         if (!userAddress) throw new Error("No userAddress provided");
+
+    //         const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+    //         if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+    //             throw new Error("Contract ABI or address missing");
+    //         }
+
+    //         const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+    //         const investments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+    //         const startDay = Number(investments?.[0]?.startDay || 0);
+
+    //         if (startDay <= 0) return [];
+
+    //         const weekNumber = getWeekNumberFromStartDay(startDay);
+    //         const weekArray = [];
+
+    //         for (let i = 0; i < weekNumber; i++) {
+    //             const startDate = new Date((startDay + i * 7) * 86400 * 1000);
+    //             const endDate = new Date((startDay + (i + 1) * 7 - 1) * 86400 * 1000); // inclusive 7th day
+
+    //             const formatDate = (date) =>
+    //                 `${date.getDate()} ${date.toLocaleString("en-US", { month: "short" })}`;
+
+    //             const year = startDate.getFullYear();
+    //             const dateRange = `${formatDate(startDate)}–${formatDate(endDate)}, ${year}`;
+
+    //             weekArray.push({
+    //                 week: i + 1,
+    //                 date: dateRange,
+    //             });
+    //         }
+
+    //         console.log("📅 All Weeks:", weekArray);
+    //         return weekArray;
+    //     } catch (error) {
+    //         console.error("❌ Error in getUserAllWeek:", error.message || error);
+    //         return [];
+    //     }
+    // },
+
+    getUserAllWeek: async (userAddress) => {
+        try {
+            if (!userAddress) throw new Error("No userAddress provided");
+
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+                throw new Error("Contract ABI or address missing");
+            }
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            const investments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
+            const rawStartDay = Number(investments?.[0]?.startDay || 0); // UNIX day count
+
+            if (rawStartDay <= 0) return [];
+
+            // Registration date and weekday
+            const regDate = new Date(rawStartDay * 86400 * 1000);
+            const regWeekday = regDate.getUTCDay(); // 0 = Sunday ... 6 = Saturday
+
+            const daysUntilNextMonday = (8 - regWeekday) % 7;
+            const firstMondayDay = rawStartDay + daysUntilNextMonday;
+
+            const todayUnixDay = Math.floor(Date.now() / 86400 / 1000);
+
+            // ⛳ Use ceil to include partial ongoing week
+            const totalFullWeeks = Math.ceil((todayUnixDay - firstMondayDay + 1) / 7);
+
+            const formatDate = (date) =>
+                `${date.getDate()} ${date.toLocaleString("en-US", { month: "short" })}`;
+
+            const weekArray = [];
+
+            // Week 1 — from registration to the Sunday before first Monday
+            const endOfFirstWeek = new Date((firstMondayDay - 1) * 86400 * 1000);
+            const firstRange = `${formatDate(regDate)}–${formatDate(endOfFirstWeek)}, ${regDate.getFullYear()}`;
+            weekArray.push({ week: 1, date: firstRange });
+
+            // Weeks 2+ — full weeks from each Monday
+            for (let i = 0; i < totalFullWeeks; i++) {
+                const startDate = new Date((firstMondayDay + i * 7) * 86400 * 1000);
+                const endDate = new Date((firstMondayDay + i * 7 + 6) * 86400 * 1000);
+
+                const range = `${formatDate(startDate)}–${formatDate(endDate)}, ${startDate.getFullYear()}`;
+                weekArray.push({
+                    week: i + 2, // Week 2 onward
+                    date: range
+                });
+            }
+
+            console.log("📅 All Weeks:", weekArray);
+            return weekArray;
+        } catch (error) {
+            console.error("❌ Error in getUserAllWeek:", error.message || error);
+            return [];
+        }
+    },
+
+    WeekWiseEarn: async (userAddress, weekNumber) => {
+
+        console.log(userAddress, weekNumber)
+        const pageSize = 50;
+        let pageNumber = 1;
+        let totalPages = 1;
+        let allWeekIncomeData = [];
+
+        try {
+            if (!userAddress || !weekNumber) throw new Error("Missing userAddress or weekNumber");
+
+            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+
+            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+                throw new Error("Contract ABI or address missing");
+            }
+
+            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const firstPage = await contract.methods
+                .getWeekLevelIncome(userAddress, weekNumber, pageSize, pageNumber)
+                .call();
+
+            console.log("first Pages", firstPage)
+
+            totalPages = Number(firstPage.totalPages || 1);
+
+            if (Array.isArray(firstPage.summary)) {
+                allWeekIncomeData.push(...firstPage.summary);
+            } else if (firstPage.summary) {
+                allWeekIncomeData.push(firstPage.summary);
+            }
+
+            for (let i = 2; i <= totalPages; i++) {
+                const page = await contract.methods
+                    .getWeekLevelIncome(userAddress, weekNumber, pageSize, i)
+                    .call();
+
+                if (Array.isArray(page.summary)) {
+                    allWeekIncomeData.push(...page.summary);
+                } else if (page.summary) {
+                    allWeekIncomeData.push(page.summary);
+                }
+            }
+
+            console.log("✅ All week income data:", allWeekIncomeData);
+        } catch (error) {
+            console.error("❌ Error fetching paginated week income:", error.message || error);
+            return {
+                referredUsd: "0.0000",
+                referredTcc: "0.00000",
+                referredUsdTotal: "0.0000",
+                referredTccTotal: "0.00000",
+                raw: []
+            };
+        }
+
+        let referredUsd = 0;
+        let referredTcc = 0;
+
+        if (allWeekIncomeData.length > 0 && Array.isArray(allWeekIncomeData[0]?.dailyIncomes)) {
+            referredUsd = allWeekIncomeData[0].dailyIncomes.reduce(
+                (acc, item) => acc + Number(item.roiUsd || 0),
+                0
+            );
+            referredTcc = allWeekIncomeData[0].dailyIncomes.reduce(
+                (acc, item) => acc + Number(item.roiTcc || 0),
+                0
+            );
+        }
+
+        const referredUsdTotal = allWeekIncomeData.reduce(
+            (acc, item) => acc + Number(item.totalRoiUsd || 0),
+            0
+        );
+        const referredTccTotal = allWeekIncomeData.reduce(
+            (acc, item) => acc + Number(item.totalRoiTcc || 0),
+            0
+        );
+
+        console.log("🧮 referredUsd, referredTcc", referredUsd, referredTcc);
+        console.log("🧮 referredUsdTotal, referredTccTotal", referredUsdTotal, referredTccTotal);
+
+        return {
+            referredUsd: (referredUsd / 1e18).toFixed(4),
+            referredTcc: (referredTcc / 1e28).toFixed(5),
+            referredUsdTotal: (referredUsdTotal / 1e18).toFixed(4),
+            referredTccTotal: (referredTccTotal / 1e28).toFixed(5),
+            raw: allWeekIncomeData
+        };
     }
+
+
 
 
 

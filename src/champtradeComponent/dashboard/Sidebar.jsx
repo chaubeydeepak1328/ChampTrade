@@ -44,6 +44,8 @@ function Sidebar() {
       items: [
         { icon: DollarSign, label: 'My Earnings', path: '/champ-trade-dashboard/my-earnings' },
         { icon: Users, label: 'My Team', path: '/champ-trade-dashboard/my-team' },
+        { icon: Users, label: 'Weekly Income', path: '/champ-trade-dashboard/week-income' },
+
         // { icon: GitFork, label: 'My Referrals', path: '/champ-trade-dashboard/my-referrals' }
       ]
     },

@@ -129,7 +129,7 @@ const ReferralStats = () => {
             onClick={handleBackClick}
             className="ml-auto flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-1 rounded-lg bg-gradient-to-br from-yellow-500/20 to-amber-400/20 hover:from-yellow-500/30 hover:to-amber-400/30 transition-all text-yellow-500 text-xs sm:text-sm"
           >
-            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+            <ChevronLeft className="w-4 h-4 sm:w-4 sm:h-4" />
             <span className="hidden xs:inline">Back</span>
           </button>
         )}
@@ -164,7 +164,7 @@ const ReferralStats = () => {
                   </p>
                 </div>
                 <div>
-                  <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Daily Contribution</p>
+                  <p className="text-neutral-400 text-[10px] xs:text-xs sm:text-sm">Till Earn</p>
                   <p className="text-yellow-500 font-bold text-xs sm:text-sm">${level.dailyContribution.toFixed(2)}</p>
                 </div>
                 <div>

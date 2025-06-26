@@ -5,6 +5,22 @@ import { useTransaction } from '../../config/register';
 import Swal from 'sweetalert2';
 import { useAppKitAccount } from '@reown/appkit/react';
 
+
+
+function getMondayDate() {
+  const today = new Date();
+  const day = today.getDay(); // Sunday = 0, Monday = 1, ..., Saturday = 6
+  const diff = today.getDate() - (day === 0 ? 6 : day - 1); // Move to Monday
+  const monday = new Date(today.setDate(diff));
+
+  const dd = monday.getDate().toString().padStart(2, '0');
+  const mm = (monday.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+  const yyyy = monday.getFullYear();
+
+  return `${dd}/${mm}/${yyyy}`; // ✅ corrected format: dd/mm/yyyy
+}
+
+
 const ClaimWithdrawPanel = () => {
   const [loading, setLoading] = useState(false);
 
@@ -150,7 +166,8 @@ const ClaimWithdrawPanel = () => {
 
       {/* Claim Options */}
       <div className="bg-[rgba(20,20,20,0)] border border-yellow-500/50 p-6 rounded-lg ">
-        <h3 className="text-lg font-semibold text-white mb-4">Claim Options</h3>
+        <h3 className="text-lg font-semibold text-white mb-1">This Week’s Claim Details</h3>
+        <h5 className='text-sm mb-4'>Earnings counted from: Monday {getMondayDate()}</h5>
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4  rounded-lg bg-[rgba(20,20,20,0)] border border-yellow-500/50 hover:border-yellow-500/50 transition-colors">
 
@@ -173,7 +190,7 @@ const ClaimWithdrawPanel = () => {
       <div className="space-y-3">
         <button disabled={!isSunday || loading}
           onClick={widthdrawAll} className={`w-full ${isSunday ? "bg-yellow-600 hover:bg-yellow-500" : ""}  text-white font-bold py-3 px-6 rounded-lg  transition-colors border border-yellow-500`}>
-          {loading ? "Processing..." : (!isSunday ? "Claim on Sunday" : "Claim All Rewards")}
+          {loading ? "Processing..." : (!isSunday ? "🔒 Note: You can claim your weekly income only on Sunday" : "Claim All Rewards")}
         </button>
         {/* <button className="w-full bg-[rgba(20,20,20,0)] border border-yellow-500/50 text-gray-300 font-bold py-3 px-6 rounded-lg hover:bg-gray-700 transition-colors ">
           Withdraw to Wallet
@@ -184,7 +201,7 @@ const ClaimWithdrawPanel = () => {
       <div className="flex items-start gap-3 p-4 bg-yellow-900/30 rounded-lg border border-yellow-500/30">
         <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-yellow-400">
-          Withdrawals only Available on Sunday
+          Withdrawals are allowed only on Sundays
         </p>
       </div>
 
