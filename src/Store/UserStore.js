@@ -476,6 +476,10 @@ export const useStore = create((set, get) => ({
 
             const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
+            const TCC_STAKING = {
+                contractAddress: Contract["TCC_STAKING"]
+            }
+
             // Fetch required investment amount
             const amountInWei = await contract.methods.getRequiredTccForInvestment().call();
 
