@@ -186,6 +186,11 @@ const ClaimWithdrawPanel = () => {
         </div>
       </div>
 
+      <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-md text-sm font-medium shadow-sm">
+        🗓️ You can claim all your previous weekly income every <span className="font-semibold">Sunday</span>.
+      </div>
+
+
       {/* Action Buttons */}
       <div className="space-y-3">
         <button disabled={!isSunday || loading}

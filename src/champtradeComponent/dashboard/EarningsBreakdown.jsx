@@ -191,12 +191,12 @@ const EarningsBreakdown = () => {
         {/* Stats Cards - Stack on mobile */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div className="bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] p-3 sm:p-4 rounded-lg border border-yellow-500/10 hover:border-yellow-500/30 transition-colors">
-            <p className="text-neutral-300 text-xs sm:text-sm mb-1">Direct Income</p>
+            <p className="text-neutral-300 text-xs sm:text-sm mb-1">Direct Income (Claimed)</p>
             <p className="text-xl sm:text-2xl font-bold text-yellow-500">${earningData?.directIncome}</p>
             {/* <p className="text-xs text-yellow-500/70 mt-1">+2.5% from yesterday</p> */}
           </div>
           <div className="bg-gradient-to-br from-[rgb(30,30,30)] to-[rgb(20,20,20)] p-3 sm:p-4 rounded-lg border border-yellow-500/10 hover:border-yellow-500/30 transition-colors">
-            <p className="text-neutral-300 text-xs sm:text-sm mb-1">Referral Income</p>
+            <p className="text-neutral-300 text-xs sm:text-sm mb-1">Referral Income (Claimed)</p>
             <p className="text-xl sm:text-2xl font-bold text-yellow-500">${earningData?.referralIncome}</p>
             {/* <p className="text-xs text-yellow-500/70 mt-1">+5.8% from yesterday</p> */}
           </div>

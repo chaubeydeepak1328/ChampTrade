@@ -494,7 +494,7 @@ export const useStore = create((set, get) => ({
             try {
                 gasLimit = await web3.eth.estimateGas({
                     from: userAddress,
-                    to: TCC_STAKING.contractAddress, // ✅ Corrected here
+                    to: Contract["TCC_STAKING"], // ✅ Corrected here
                     data: trxData,
                     value: 0
                 });
@@ -511,7 +511,7 @@ export const useStore = create((set, get) => ({
             // Prepare transaction object
             const tx = {
                 from: userAddress,
-                to: TCC_STAKING.contractAddress,  // ✅ Corrected here
+                to: Contract["TCC_STAKING"],  // ✅ Corrected here
                 data: trxData,
                 gas: gasLimit,
                 gasPrice: gasPrice,
@@ -1031,11 +1031,12 @@ export const useStore = create((set, get) => ({
             const trxData = contract.methods.claimLevelROI().encodeABI();
             const gasPrice = await web3.eth.getGasPrice();
 
+           
             let gasLimit;
             try {
                 gasLimit = await web3.eth.estimateGas({
                     from: userAddress,
-                    to: TCC_STAKING.contractAddress,
+                    to: Contract["TCC_STAKING"],
                     data: trxData,
                     value: '0'
                 });
@@ -1074,7 +1075,7 @@ export const useStore = create((set, get) => ({
 
             const tx = {
                 from: userAddress,
-                to: TCC_STAKING.contractAddress,
+                to: Contract["TCC_STAKING"],
                 data: trxData,
                 gas: gasLimit,
                 gasPrice: gasPrice
