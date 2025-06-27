@@ -126,10 +126,12 @@ export const useStore = create((set, get) => ({
 
     dashboardCardInfo: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            console.log("🔗 TCC_STAKING Contract:", TCC_STAKING);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // console.log("🔗 TCC_STAKING Contract:", TCC_STAKING);
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             // Parallel fetching
             const [userInvestments, levelWiseTeam] = await Promise.all([
@@ -237,8 +239,10 @@ export const useStore = create((set, get) => ({
 
     getMyEarningsData: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             // 📌 Fetch level-wise accumulated ROI
             const levelRoiData = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
@@ -277,14 +281,16 @@ export const useStore = create((set, get) => ({
     getUserAllowance: async (userAddress) => {
 
 
-        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-        console.log("==================> TCC_STAKING", TCC_STAKING)
+        // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+        // console.log("==================> TCC_STAKING", TCC_STAKING)
 
 
         // console.log(Contract["TCC_TEST"], TCC_TEST_ABI)
         const contract = new web3.eth.Contract(TCC_TEST_ABI, Contract["TCC_TEST"]);
-        const contract1 = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
+
+        // const contract1 = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+        const contract1 = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
 
         const spenderAddress = Contract["TCC_STAKING"];
@@ -320,9 +326,11 @@ export const useStore = create((set, get) => ({
     stackAmount: async (userAddress) => {
         try {
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             // Properly call contract functions
             const amountInWei = await contract.methods.getRequiredTccForInvestment().call();
@@ -463,8 +471,10 @@ export const useStore = create((set, get) => ({
 
     RegisterUser: async (userAddress, sponsorAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             // Fetch required investment amount
             const amountInWei = await contract.methods.getRequiredTccForInvestment().call();
@@ -519,8 +529,10 @@ export const useStore = create((set, get) => ({
 
 
     Profile: async (userAddress) => {
-        const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-        const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+        // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+        // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+        const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
         const directSponsor = await contract.methods.getDirectSponsor(userAddress).call();
 
         return {
@@ -533,8 +545,10 @@ export const useStore = create((set, get) => ({
 
     getTeamDashboardData: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             // Get full team levels: [[level1Refs], [level2Refs], ...]
             const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
@@ -616,9 +630,11 @@ export const useStore = create((set, get) => ({
 
     getWihDrawDetails: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract1 = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            const contract1 = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
+
             const contract = new web3.eth.Contract(TCC_TEST_ABI, Contract["TCC_TEST"]);
-            const contract1 = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
             // Get LevelWiseRefferal
             const levelWiseTeam = await contract1.methods.getLevelWiseTeam(userAddress).call();
@@ -657,7 +673,7 @@ export const useStore = create((set, get) => ({
 
             // 📌 6. Get this week's level income
             // 📌 6. Get this week's level income with pagination
-            const pageSize = 5;
+            const pageSize = 50;
             let pageNumber = 1;
             let totalPages = 1;
             let allWeekIncomeData = [];
@@ -741,10 +757,12 @@ export const useStore = create((set, get) => ({
 
     getUserIndWdrDetails: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
             // console.log("==================> TCC_STAKING", TCC_STAKING)
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
             // come in Array format
             const investmentId = await contract.methods.getUserInvestmentIDs(userAddress).call();
 
@@ -812,9 +830,12 @@ export const useStore = create((set, get) => ({
     claimRoiIndividual: async (userAddress, investmentId) => {
         try {
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             console.log(investmentId)
 
@@ -863,8 +884,11 @@ export const useStore = create((set, get) => ({
 
     myReferral: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             const levelWiseTeam = await contract.methods.getLevelWiseTeam(userAddress).call();
             const levelWiseROIRes = await contract.methods.getLevelWiseAccumulatedRoi(userAddress).call();
@@ -962,14 +986,16 @@ export const useStore = create((set, get) => ({
         try {
             if (!userAddress) throw new Error("User address is required.");
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
 
-            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
-                console.warn("TCC_STAKING ABI or address missing.");
-                return [];
-            }
+            // if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+            //     console.warn("TCC_STAKING ABI or address missing.");
+            //     return [];
+            // }
 
 
 
@@ -993,8 +1019,10 @@ export const useStore = create((set, get) => ({
 
     ClaimAllReward: async (userAddress) => {
         try {
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             const trxData = contract.methods.claimLevelROI().encodeABI();
             const gasPrice = await web3.eth.getGasPrice();
@@ -1061,13 +1089,15 @@ export const useStore = create((set, get) => ({
         try {
             if (!userId) throw new Error("User ID is required.");
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");s
 
-            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
-                throw new Error("TCC_STAKING ABI or contract address missing.");
-            }
+            // if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
+            //     throw new Error("TCC_STAKING ABI or contract address missing.");
+            // }
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             const address = await contract.methods.getUserAddressByID(userId).call();
 
@@ -1107,11 +1137,13 @@ export const useStore = create((set, get) => ({
                 throw new Error("userAddresses must be an array.");
             }
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
 
 
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             const userDataArray = await Promise.all(
                 userAddresses.map(async (address) => {
@@ -1138,11 +1170,13 @@ export const useStore = create((set, get) => ({
         try {
 
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
 
 
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             const claimHist = await contract.methods.getLevelClaimHistory(userAddress).call();
 
@@ -1205,12 +1239,12 @@ export const useStore = create((set, get) => ({
         try {
             if (!userAddress) throw new Error("No userAddress provided");
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
-            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
-                throw new Error("Contract ABI or address missing");
-            }
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
+
+
             const investments = await contract.methods.getUserInvestmentsWithDetails(userAddress).call();
             const rawStartDay = Number(investments?.[0]?.startDay || 0); // UNIX day count
 
@@ -1269,13 +1303,10 @@ export const useStore = create((set, get) => ({
         try {
             if (!userAddress || !weekNumber) throw new Error("Missing userAddress or weekNumber");
 
-            const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const TCC_STAKING = await fetchContractAbi("TCC_STAKING");
+            // const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
 
-            if (!TCC_STAKING?.abi || !TCC_STAKING?.contractAddress) {
-                throw new Error("Contract ABI or address missing");
-            }
-
-            const contract = new web3.eth.Contract(TCC_STAKING.abi, TCC_STAKING.contractAddress);
+            const contract = new web3.eth.Contract(CONTRACT_ABI, Contract["TCC_STAKING"]);
 
             const firstPage = await contract.methods
                 .getWeekLevelIncome(userAddress, weekNumber, pageSize, pageNumber)
