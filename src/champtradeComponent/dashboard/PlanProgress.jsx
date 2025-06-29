@@ -379,7 +379,7 @@ const PlanProgress = () => {
             <table className="min-w-[1600px] divide-y divide-yellow-500/20">
               <thead className="bg-[rgb(25,25,25)]">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
+                  {/* <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th> */}
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Price During investment</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Invested (USD)</th>
@@ -398,7 +398,9 @@ const PlanProgress = () => {
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Last Reinvest</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Last Claim</th>
 
+                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Roi Reveived</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Days Claimed</th>
+
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Remaining Days</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Daily ROI (USD)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Daily ROI (TCC)</th>
@@ -411,7 +413,7 @@ const PlanProgress = () => {
                 {userInvDet.length > 0 && userInvDet ? (
                   userInvDet?.map((inv, index) => (
                     <tr key={inv.investmentID || index} className="hover:bg-yellow-500/5">
-                      <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
+                      {/* <td className="px-4 py-3 text-sm text-white">{index + 1}</td> */}
                       <td className="px-4 py-3 text-sm text-white">{inv.investmentID}</td>
                       <td className="px-4 py-3 text-sm text-white">${(inv.tccPriceDuringInvestment).toFixed(4)}</td>
                       <td className="px-4 py-3 text-sm text-white">${(inv.investedAmountInUSD).toFixed(2)}</td>
@@ -612,7 +614,7 @@ const PlanProgress = () => {
               <thead className="bg-[rgb(25,25,25)]">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">S. No</th>
-                  <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th>
+                  {/* <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Investment ID</th> */}
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed (USD)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed (TCC)</th>
                   <th className="px-4 py-3 text-left text-xs font-bold text-yellow-500 uppercase">Claimed</th>
@@ -624,7 +626,7 @@ const PlanProgress = () => {
                   claimHistory.map((inv, index) => (
                     <tr key={inv.id || index} className="hover:bg-yellow-500/5">
                       <td className="px-4 py-3 text-sm text-white">{index + 1}</td>
-                      <td className="px-4 py-3 text-sm text-white">{inv.id.toString()}</td>
+                      {/* <td className="px-4 py-3 text-sm text-white">{inv.id.toString()}</td> */}
                       <td className="px-4 py-3 text-sm text-white">
                         {inv.amountInUSD ? `$${(Number(inv.amountInUSD) / 1e8).toFixed(4)}` : 'N/A'}
                       </td>
@@ -653,10 +655,10 @@ const PlanProgress = () => {
             {claimHistory?.map((inv, index) => (
               <div key={inv.id || index} className="bg-[rgb(30,30,30)] p-4 rounded-lg border border-yellow-500/20">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  {/* <div>
                     <p className="text-xs text-yellow-500">Investment ID</p>
                     <p className="text-sm text-white">{inv.id.toString()}</p>
-                  </div>
+                  </div> */}
                   <div>
                     <p className="text-xs text-yellow-500">Claimed (TCC)</p>
                     <p className="text-sm text-white">

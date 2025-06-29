@@ -1081,7 +1081,7 @@ export const useStore = create((set, get) => ({
                 gasPrice: gasPrice
             };
 
-            return { trxData, tx };
+            return tx;
 
         } catch (error) {
             console.error("❌ ClaimAllReward error:", error);
